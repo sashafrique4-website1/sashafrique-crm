@@ -161,11 +161,16 @@ select.filter-sel:focus{border-color:var(--gold);}
 .chart-wrap{position:relative;height:200px;}
 .quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;}
 
-/* CLOCK WIDGET (officer dashboard) */
-.clock-widget{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:28px 24px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden;
-}
+/* SYNC STATUS */
+.sync-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:20px;font-size:12px;color:var(--text2);}
+.sync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.sync-dot.ok{background:var(--green);}
+.sync-dot.loading{background:var(--gold);animation:pulse 1s infinite;}
+.sync-dot.error{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* CLOCK WIDGET */
+.clock-widget{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden;}
 .clock-widget::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);}
 .clock-widget-time{font-family:'Playfair Display',serif;font-size:48px;font-weight:600;color:var(--gold);letter-spacing:.02em;line-height:1;}
 .clock-widget-date{font-size:13px;color:var(--text2);margin-top:6px;}
@@ -178,11 +183,6 @@ select.filter-sel:focus{border-color:var(--gold);}
 .btn-cin:hover{background:#f5c020;transform:translateY(-1px);}
 .btn-cout{padding:12px 28px;font-size:14px;font-weight:600;border-radius:var(--radius-sm);background:var(--surface3);color:var(--text);border:1.5px solid var(--border);transition:all var(--trans);}
 .btn-cout:hover{border-color:var(--text2);}
-
-/* ATTENDANCE VIEW (admin) */
-.clock-display{text-align:center;padding:36px 24px;}
-.clock-time{font-family:'Playfair Display',serif;font-size:56px;font-weight:600;color:var(--gold);letter-spacing:.02em;line-height:1;}
-.clock-date{font-size:14px;color:var(--text2);margin-top:8px;}
 
 /* MODAL */
 #modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;padding:20px;}
@@ -225,6 +225,16 @@ select.filter-sel:focus{border-color:var(--gold);}
 .fq-add input{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);}
 .fq-add input:focus{border-color:var(--gold);outline:none;}
 
+/* SETUP SCREEN */
+#setup-screen{position:fixed;inset:0;z-index:998;display:none;align-items:center;justify-content:center;background:var(--bg);}
+#setup-screen.open{display:flex;}
+.setup-card{width:100%;max-width:480px;padding:48px 40px;background:var(--surface);border:1px solid var(--border);border-radius:20px;}
+.setup-card h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;margin-bottom:8px;}
+.setup-card p{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.6;}
+.setup-steps{margin-bottom:24px;}
+.setup-step{display:flex;gap:12px;margin-bottom:14px;font-size:13px;align-items:flex-start;}
+.setup-step-num{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#000;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+
 /* TOAST */
 #toast-container{position:fixed;bottom:80px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
 .toast{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);font-size:13px;font-weight:500;min-width:220px;pointer-events:auto;animation:toast-in .22s ease;}
@@ -240,7 +250,6 @@ select.filter-sel:focus{border-color:var(--gold);}
 .empty-icon svg{width:24px;height:24px;}
 .empty-state h4{font-size:15px;font-weight:600;margin-bottom:6px;}
 .empty-state p{font-size:13px;color:var(--text2);max-width:280px;margin:0 auto 20px;}
-.section-gap{margin-bottom:24px;}
 
 /* RESPONSIVE */
 @media(max-width:768px){
@@ -263,8 +272,27 @@ select.filter-sel:focus{border-color:var(--gold);}
 </head>
 <body>
 
+<!-- SETUP SCREEN (shown if no Apps Script URL configured) -->
+<div id="setup-screen">
+  <div class="setup-card">
+    <h2>Connect Google Sheets</h2>
+    <p>To save your data, paste your Google Apps Script Web App URL below. This only needs to be done once.</p>
+    <div class="setup-steps">
+      <div class="setup-step"><div class="setup-step-num">1</div><span>Open your Google Sheet → Extensions → Apps Script</span></div>
+      <div class="setup-step"><div class="setup-step-num">2</div><span>Paste the <strong>Code.gs</strong> file content and run <strong>setupSheets()</strong></span></div>
+      <div class="setup-step"><div class="setup-step-num">3</div><span>Deploy → New deployment → Web app → Anyone → Copy URL</span></div>
+      <div class="setup-step"><div class="setup-step-num">4</div><span>Paste URL here and click Save</span></div>
+    </div>
+    <div class="form-row">
+      <label>Apps Script Web App URL</label>
+      <input type="url" id="setup-url" placeholder="https://script.google.com/macros/s/…/exec" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;color:var(--text);"/>
+    </div>
+    <button class="btn btn-gold btn-full" onclick="Setup.save()" style="margin-top:8px">Save & Connect</button>
+  </div>
+</div>
+
 <!-- LOGIN -->
-<div id="login-screen">
+<div id="login-screen" style="display:none;">
   <div class="login-bg"></div>
   <div class="login-card">
     <div class="login-logo">
@@ -291,7 +319,7 @@ select.filter-sel:focus{border-color:var(--gold);}
   <nav id="sidebar">
     <div class="sidebar-brand">
       <div class="sidebar-brand-mark">S</div>
-      <div class="sidebar-brand-text"><strong>Sash Afrique</strong><span>CRM v1</span></div>
+      <div class="sidebar-brand-text"><strong>Sash Afrique</strong><span>CRM v2</span></div>
     </div>
     <div class="sidebar-nav" id="sidebar-nav-items"></div>
     <div class="sidebar-footer">
@@ -310,14 +338,18 @@ select.filter-sel:focus{border-color:var(--gold);}
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
       <span id="topbar-title">Dashboard</span>
-      <div id="topbar-actions"></div>
+      <div id="topbar-actions">
+        <div class="sync-bar" id="sync-bar" style="display:none">
+          <span class="sync-dot loading" id="sync-dot"></span>
+          <span id="sync-label">Connecting…</span>
+        </div>
+      </div>
     </div>
 
     <div id="content">
 
       <!-- DASHBOARD -->
       <div class="view active" id="view-dashboard">
-        <!-- Officer clock widget injected here by JS -->
         <div id="officer-clock-widget"></div>
         <div class="kpi-grid" id="dash-kpis"></div>
         <div class="quick-actions" id="dash-quickactions"></div>
@@ -334,7 +366,7 @@ select.filter-sel:focus{border-color:var(--gold);}
         <div class="card" id="dash-recent-card">
           <div class="card-header">
             <h3 id="dash-recent-title">Recent Leads</h3>
-            <button class="btn btn-ghost btn-sm" id="dash-recent-more" onclick="Router.go('leads')">View all →</button>
+            <button class="btn btn-ghost btn-sm" onclick="Router.go('leads')">View all →</button>
           </div>
           <div class="tbl-wrap">
             <table id="dash-recent-leads">
@@ -343,7 +375,6 @@ select.filter-sel:focus{border-color:var(--gold);}
             </table>
           </div>
         </div>
-        <!-- Admin-only: Esther's attendance summary -->
         <div id="admin-att-summary" style="display:none;margin-top:14px;">
           <div class="card">
             <div class="card-header">
@@ -414,7 +445,7 @@ select.filter-sel:focus{border-color:var(--gold);}
         </div>
       </div>
 
-      <!-- ATTENDANCE (admin only) -->
+      <!-- ATTENDANCE -->
       <div class="view" id="view-attendance">
         <div class="page-header">
           <div class="page-header-left"><h2>Attendance Report</h2><p>Esther's clock-in history and performance.</p></div>
@@ -434,7 +465,6 @@ select.filter-sel:focus{border-color:var(--gold);}
     </div>
   </div>
 
-  <!-- Bottom nav -->
   <nav id="bottom-nav">
     <div class="bnav-items" id="bnav-items"></div>
   </nav>
@@ -465,16 +495,110 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const fmt=d=>d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';
 const pad2=n=>String(n).padStart(2,'0');
 
-/* ── STORAGE ───────────────────────────────────────── */
-const DB={
-  get:k=>JSON.parse(localStorage.getItem(k)||'null'),
-  set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),
-  all:k=>JSON.parse(localStorage.getItem(k)||'[]'),
-  save:(k,a)=>localStorage.setItem(k,JSON.stringify(a)),
-  add(k,r){const a=this.all(k);a.push(r);this.save(k,a);return r;},
-  update(k,id,d){const a=this.all(k);const i=a.findIndex(r=>r.id===id);if(i>-1){a[i]={...a[i],...d};this.save(k,a);}},
-  remove(k,id){this.save(k,this.all(k).filter(r=>r.id!==id));},
-  find:(k,id)=>DB.all(k).find(r=>r.id===id),
+/* ── SETUP ─────────────────────────────────────────── */
+const Setup={
+  getURL(){return localStorage.getItem('gs_url')||'';},
+  save(){
+    const url=$('setup-url').value.trim();
+    if(!url||!url.includes('script.google.com')){
+      Toast.show('Please paste a valid Apps Script URL.','error');return;
+    }
+    localStorage.setItem('gs_url',url);
+    $('setup-screen').classList.remove('open');
+    App.showLogin();
+    Toast.show('Google Sheets connected!','success');
+  },
+  reset(){
+    if(!confirm('Disconnect Google Sheets? All local data stays in the Sheet.')) return;
+    localStorage.removeItem('gs_url');
+    location.reload();
+  }
+};
+
+/* ── GOOGLE SHEETS API ─────────────────────────────── */
+const GS={
+  url(){return Setup.getURL();},
+
+  async get(tab){
+    SyncBar.loading(`Loading ${tab}…`);
+    try{
+      const res=await fetch(`${this.url()}?tab=${encodeURIComponent(tab)}`);
+      const json=await res.json();
+      if(json.error) throw new Error(json.error);
+      SyncBar.ok();
+      return json.data||[];
+    }catch(e){
+      SyncBar.error('Sheet error: '+e.message);
+      return [];
+    }
+  },
+
+  async append(tab,row){
+    SyncBar.loading('Saving…');
+    try{
+      const res=await fetch(this.url(),{
+        method:'POST',
+        body:JSON.stringify({action:'append',tab,row}),
+      });
+      const json=await res.json();
+      if(json.error) throw new Error(json.error);
+      SyncBar.ok();return true;
+    }catch(e){SyncBar.error('Save failed: '+e.message);return false;}
+  },
+
+  async update(tab,id,updates){
+    SyncBar.loading('Updating…');
+    try{
+      const res=await fetch(this.url(),{
+        method:'POST',
+        body:JSON.stringify({action:'update',tab,id,updates}),
+      });
+      const json=await res.json();
+      if(json.error) throw new Error(json.error);
+      SyncBar.ok();return true;
+    }catch(e){SyncBar.error('Update failed: '+e.message);return false;}
+  },
+
+  async delete(tab,id){
+    SyncBar.loading('Deleting…');
+    try{
+      const res=await fetch(this.url(),{
+        method:'POST',
+        body:JSON.stringify({action:'delete',tab,id}),
+      });
+      const json=await res.json();
+      if(json.error) throw new Error(json.error);
+      SyncBar.ok();return true;
+    }catch(e){SyncBar.error('Delete failed: '+e.message);return false;}
+  },
+
+  async getConfig(){
+    try{
+      const res=await fetch(this.url(),{method:'POST',body:JSON.stringify({action:'getConfig'})});
+      const json=await res.json();
+      return json.value||null;
+    }catch(e){return null;}
+  },
+
+  async setConfig(value){
+    try{
+      await fetch(this.url(),{method:'POST',body:JSON.stringify({action:'setConfig',value})});
+    }catch(e){}
+  },
+};
+
+/* ── SYNC BAR ──────────────────────────────────────── */
+const SyncBar={
+  show(){$('sync-bar').style.display='flex';},
+  loading(msg){this.show();$('sync-dot').className='sync-dot loading';$('sync-label').textContent=msg||'Syncing…';},
+  ok(){$('sync-dot').className='sync-dot ok';$('sync-label').textContent='Synced with Google Sheets';setTimeout(()=>{$('sync-bar').style.display='none';},2500);},
+  error(msg){this.show();$('sync-dot').className='sync-dot error';$('sync-label').textContent=msg;},
+};
+
+/* ── IN-MEMORY CACHE ───────────────────────────────── */
+const Cache={
+  leads:[],feedback:[],attendance:[],
+  fbQuestions:null,
 };
 
 /* ── DEFAULT FEEDBACK QUESTIONS ────────────────────── */
@@ -486,43 +610,14 @@ const DEFAULT_QUESTIONS=[
   'Is there anything we could have done better?',
 ];
 
-/* ── SEED ──────────────────────────────────────────── */
-function seedIfEmpty(){
-  if(DB.all('leads').length) return;
-  if(!DB.get('fb_questions')) DB.set('fb_questions',DEFAULT_QUESTIONS);
-  const leads=[
-    {id:uid(),name:'Akosua Mensah',phone:'0244123456',email:'akosua@ghmail.com',school:'UPSA',programme:'MBA',company:'',product:'Graduation Sash',source:'Referral',stage:'Won',followup:'',notes:'Delivered for 2024 graduation.',created:today()},
-    {id:uid(),name:'Kwame Asante',phone:'0277654321',email:'',school:'UG',programme:'MSc Finance',company:'',product:'Honour Sash',source:'WhatsApp',stage:'Negotiating',followup:today(),notes:'Bulk order for 12 graduands.',created:today()},
-    {id:uid(),name:'Abena Frimpong',phone:'0200987654',email:'abena@corp.com',school:'',programme:'',company:'GCB Bank',product:'Corporate Sash',source:'LinkedIn',stage:'Quotation Sent',followup:today(),notes:'',created:today()},
-    {id:uid(),name:'Yaw Boateng',phone:'0246111222',email:'',school:'KNUST',programme:'BSc Engineering',company:'',product:'Graduation Sash',source:'Instagram',stage:'Contacted',followup:'',notes:'',created:today()},
-    {id:uid(),name:'Efua Darko',phone:'0541223344',email:'efua@school.edu',school:'Ashesi',programme:'BBA',company:'',product:'Honour Sash',source:'Instagram',stage:'New Lead',followup:'',notes:'Inquired via Instagram.',created:today()},
-  ];
-  const feedback=[
-    {id:uid(),name:'Akosua Mensah',orderNo:'SA-001',product:'Graduation Sash',socialHandle:'@akosua_mensah',birthday:'1998-04-15',nps:10,answers:['Absolutely stunning quality!','Yes, exactly as expected.','Yes, on time.','Definitely already recommended to 3 people!','Nothing — it was perfect.'],testimonial:true,referralName:'Kwame Asante',referralPhone:'0277654321',framedSash:true,framedSashNote:'Wants the 8×10 gold frame.',date:today()},
-    {id:uid(),name:'Kwame Asante',orderNo:'SA-002',product:'Honour Sash',socialHandle:'',birthday:'',nps:8,answers:['Great product overall.','Yes.','Slightly delayed but manageable.','Yes I would.','Faster delivery would be great.'],testimonial:false,referralName:'',referralPhone:'',framedSash:false,framedSashNote:'',date:today()},
-  ];
-  const officer='Esther Minta';
-  const attRecords=[];
-  for(let i=1;i<=6;i++){
-    const d=new Date();d.setDate(d.getDate()-i);
-    const ds=d.toISOString().slice(0,10);
-    // skip weekends
-    if(d.getDay()===0||d.getDay()===6) continue;
-    attRecords.push({id:uid(),staff:officer,date:ds,clockIn:i===2?'08:42':'08:07',clockOut:'17:00',hours:i===2?8.3:8.9,late:i===2});
-  }
-  leads.forEach(l=>DB.add('leads',l));
-  feedback.forEach(f=>DB.add('feedback',f));
-  attRecords.forEach(r=>DB.add('attendance',r));
-}
-
 /* ── AUTH ──────────────────────────────────────────── */
 const USERS=[
   {id:'u1',name:'Nana Boateng',email:'admin@sashafrique.com',password:'admin2024',role:'Admin'},
   {id:'u2',name:'Esther Minta',email:'officer@sashafrique.com',password:'officer2024',role:'Officer'},
 ];
 const Auth={
-  current:()=>DB.get('session'),
-  isAdmin:()=>DB.get('session')?.role==='Admin',
+  current(){return JSON.parse(localStorage.getItem('session')||'null');},
+  isAdmin(){return this.current()?.role==='Admin';},
   login(){
     const em=$('l-email').value.trim().toLowerCase();
     const pw=$('l-pass').value;
@@ -530,12 +625,12 @@ const Auth={
     const err=$('login-error');
     if(!u){err.textContent='Incorrect email or password.';err.style.display='block';return;}
     err.style.display='none';
-    DB.set('session',{id:u.id,name:u.name,email:u.email,role:u.role});
+    localStorage.setItem('session',JSON.stringify({id:u.id,name:u.name,email:u.email,role:u.role}));
     App.showApp();
   },
   logout(){
     if(!confirm('Sign out?')) return;
-    DB.set('session',null);
+    localStorage.removeItem('session');
     App.showLogin();
   },
 };
@@ -546,7 +641,7 @@ const Toast={
     const icons={
       success:'<svg class="toast-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>',
       error:'<svg class="toast-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>',
-      info:'<svg class="toast-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01"/></svg>',
+      info:'<svg class="toast-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/></svg>',
     };
     const t=document.createElement('div');
     t.className=`toast toast-${type}`;
@@ -571,20 +666,11 @@ const Modal={
 };
 
 /* ── ROUTER ────────────────────────────────────────── */
-const VIEWS_ADMIN={
-  dashboard:{title:'Dashboard'},
-  leads:{title:'Leads'},
-  feedback:{title:'Achiever Feedback'},
-  attendance:{title:'Attendance Report'},
-};
-const VIEWS_OFFICER={
-  dashboard:{title:'Dashboard'},
-  leads:{title:'Leads'},
-  feedback:{title:'Achiever Feedback'},
-};
+const VIEWS_ADMIN={dashboard:{title:'Dashboard'},leads:{title:'Leads'},feedback:{title:'Achiever Feedback'},attendance:{title:'Attendance Report'}};
+const VIEWS_OFFICER={dashboard:{title:'Dashboard'},leads:{title:'Leads'},feedback:{title:'Achiever Feedback'}};
 const Router={
   current:'dashboard',
-  go(v){
+  async go(v){
     const views=Auth.isAdmin()?VIEWS_ADMIN:VIEWS_OFFICER;
     if(!views[v]) return;
     this.current=v;
@@ -594,10 +680,10 @@ const Router={
       el.classList.toggle('active',el.dataset.view===v);
     });
     $('topbar-title').textContent=views[v].title;
-    if(v==='dashboard') Dashboard.render();
-    else if(v==='leads') Leads.render();
-    else if(v==='feedback') Feedback.render();
-    else if(v==='attendance') Attendance.render();
+    if(v==='dashboard') await Dashboard.render();
+    else if(v==='leads') await Leads.render();
+    else if(v==='feedback') await Feedback.render();
+    else if(v==='attendance') await Attendance.render();
     Modal.close();closeSidebar();window.scrollTo(0,0);
   }
 };
@@ -611,13 +697,9 @@ const NAV_ICONS={
 };
 function buildNav(){
   const isAdmin=Auth.isAdmin();
-  const items=isAdmin
-    ?['dashboard','leads','feedback','attendance']
-    :['dashboard','leads','feedback'];
+  const items=isAdmin?['dashboard','leads','feedback','attendance']:['dashboard','leads','feedback'];
   const labels={dashboard:'Dashboard',leads:'Leads',feedback:'Feedback',attendance:'Attendance'};
   const bnavLabels={dashboard:'Home',leads:'Leads',feedback:'Feedback',attendance:'Reports'};
-
-  // sidebar
   $('sidebar-nav-items').innerHTML=`
     <div class="nav-section-label">Overview</div>
     ${items.map(v=>`
@@ -625,16 +707,17 @@ function buildNav(){
         ${NAV_ICONS[v]}${labels[v]}
         ${v==='leads'?'<span class="nav-badge" id="nb-leads"></span>':''}
       </div>`).join('')}
+    <div class="nav-section-label" style="margin-top:12px">Settings</div>
+    <div class="nav-item" onclick="Setup.reset()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+      Reconnect Sheet
+    </div>
   `;
-  // bottom nav
   $('bnav-items').innerHTML=items.map(v=>`
     <div class="bnav-item${v==='dashboard'?' active':''}" data-view="${v}">
-      ${NAV_ICONS[v]}
-      <span>${bnavLabels[v]}</span>
+      ${NAV_ICONS[v]}<span>${bnavLabels[v]}</span>
       ${v==='leads'?'<span class="bnav-badge" id="bnb-leads"></span>':''}
     </div>`).join('');
-
-  // bind clicks
   document.querySelectorAll('[data-view]').forEach(el=>{
     el.addEventListener('click',()=>Router.go(el.dataset.view));
   });
@@ -647,17 +730,44 @@ function stageBadge(s){const c=STAGE_COLORS[s]||'#888';return`<span class="badge
 function npsClass(n){return n>=9?'badge-green':n>=7?'badge-gold':'badge-red';}
 function npsLabel(n){return n>=9?'Promoter':n>=7?'Passive':'Detractor';}
 
+/* ── LEAD ROW HELPERS ──────────────────────────────── */
+function leadToRow(l){
+  return[l.id,l.name,l.phone,l.email,l.school,l.programme||'',l.company,l.product,l.source,l.stage,l.followup,l.notes,l.created];
+}
+function rowToLead(r){
+  return{id:r.id,name:r.name,phone:r.phone,email:r.email,school:r.school,programme:r.programme||'',company:r.company,product:r.product,source:r.source,stage:r.stage,followup:r.followup||'',notes:r.notes,created:r.created};
+}
+function feedbackToRow(f){
+  return[f.id,f.name,f.orderNo,f.product,f.socialHandle,f.birthday,f.nps,JSON.stringify(f.answers),f.testimonial?'TRUE':'FALSE',f.referralName,f.referralPhone,f.framedSash?'TRUE':'FALSE',f.framedSashNote,f.date];
+}
+function rowToFeedback(r){
+  let answers=[];
+  try{answers=JSON.parse(r.answers||'[]');}catch(e){}
+  return{id:r.id,name:r.name,orderNo:r.orderNo,product:r.product,socialHandle:r.socialHandle||'',birthday:r.birthday||'',nps:+r.nps||0,answers,testimonial:r.testimonial==='TRUE'||r.testimonial===true,referralName:r.referralName||'',referralPhone:r.referralPhone||'',framedSash:r.framedSash==='TRUE'||r.framedSash===true,framedSashNote:r.framedSashNote||'',date:r.date};
+}
+function attToRow(a){
+  return[a.id,a.staff,a.date,a.clockIn,a.clockOut||'',a.hours||0,a.late?'TRUE':'FALSE'];
+}
+function rowToAtt(r){
+  return{id:r.id,staff:r.staff,date:r.date,clockIn:r.clockIn,clockOut:r.clockOut||null,hours:+r.hours||0,late:r.late==='TRUE'||r.late===true};
+}
+
 /* ══════════════════════════════════════════════════
    DASHBOARD
 ══════════════════════════════════════════════════ */
 let pipelineChart=null,npsChart=null,clockWidgetTick=null;
 
 const Dashboard={
-  render(){
+  async render(){
     const isAdmin=Auth.isAdmin();
-    const leads=DB.all('leads');
-    const fb=DB.all('feedback');
-    const att=DB.all('attendance');
+    const [leadsRaw,fbRaw,attRaw]=await Promise.all([
+      GS.get('Leads'),GS.get('Feedback'),GS.get('Attendance')
+    ]);
+    Cache.leads=leadsRaw.map(rowToLead);
+    Cache.feedback=fbRaw.map(rowToFeedback);
+    Cache.attendance=attRaw.map(rowToAtt);
+
+    const leads=Cache.leads,fb=Cache.feedback,att=Cache.attendance;
     const todayStr=today();
     const openLeads=leads.filter(l=>!['Won','Lost'].includes(l.stage));
     const wonLeads=leads.filter(l=>l.stage==='Won');
@@ -665,7 +775,6 @@ const Dashboard={
     const avgNps=fb.length?Math.round(fb.reduce((a,f)=>a+f.nps,0)/fb.length*10)/10:0;
     const todayAtt=att.filter(a=>a.date===todayStr);
 
-    // Officer: show clock widget
     const cw=$('officer-clock-widget');
     if(!isAdmin){
       cw.innerHTML=this.clockWidgetHTML();
@@ -676,7 +785,6 @@ const Dashboard={
       if(clockWidgetTick){clearInterval(clockWidgetTick);clockWidgetTick=null;}
     }
 
-    // KPIs differ by role
     if(isAdmin){
       $('dash-kpis').innerHTML=`
         <div class="kpi-card kpi-gold"><div class="kpi-label">Open Leads</div><div class="kpi-value">${openLeads.length}</div><div class="kpi-sub">${leads.length} total</div></div>
@@ -685,10 +793,6 @@ const Dashboard={
         <div class="kpi-card"><div class="kpi-label">Avg NPS</div><div class="kpi-value">${fb.length?avgNps:'—'}</div><div class="kpi-sub">${fb.length} responses</div></div>
         <div class="kpi-card"><div class="kpi-label">Esther In Today</div><div class="kpi-value">${todayAtt.length?'Yes':'No'}</div><div class="kpi-sub">${todayAtt.length?`at ${todayAtt[0].clockIn}`:'Not yet'}</div></div>
       `;
-      $('dash-quickactions').innerHTML=`
-        <button class="btn btn-gold btn-sm" onclick="Router.go('leads');setTimeout(()=>Leads.openAdd(),50)">+ Add Lead</button>
-        <button class="btn btn-ghost btn-sm" onclick="Router.go('feedback');setTimeout(()=>Feedback.openAdd(),50)">+ Log Feedback</button>
-      `;
     } else {
       $('dash-kpis').innerHTML=`
         <div class="kpi-card kpi-gold"><div class="kpi-label">My Open Leads</div><div class="kpi-value">${openLeads.length}</div><div class="kpi-sub">${leads.length} total</div></div>
@@ -696,13 +800,13 @@ const Dashboard={
         <div class="kpi-card"><div class="kpi-label">Feedback Logged</div><div class="kpi-value">${fb.length}</div><div class="kpi-sub">Total responses</div></div>
         <div class="kpi-card"><div class="kpi-label">Avg NPS</div><div class="kpi-value">${fb.length?avgNps:'—'}</div><div class="kpi-sub">Score</div></div>
       `;
-      $('dash-quickactions').innerHTML=`
-        <button class="btn btn-gold btn-sm" onclick="Router.go('leads');setTimeout(()=>Leads.openAdd(),50)">+ Add Lead</button>
-        <button class="btn btn-ghost btn-sm" onclick="Router.go('feedback');setTimeout(()=>Feedback.openAdd(),50)">+ Log Feedback</button>
-      `;
     }
 
-    // Recent leads
+    $('dash-quickactions').innerHTML=`
+      <button class="btn btn-gold btn-sm" onclick="Router.go('leads');setTimeout(()=>Leads.openAdd(),200)">+ Add Lead</button>
+      <button class="btn btn-ghost btn-sm" onclick="Router.go('feedback');setTimeout(()=>Feedback.openAdd(),200)">+ Log Feedback</button>
+    `;
+
     const recent=[...leads].reverse().slice(0,5);
     $('dash-recent-leads').querySelector('tbody').innerHTML=recent.length
       ?recent.map(l=>`<tr onclick="Router.go('leads')" style="cursor:pointer"><td><strong>${esc(l.name)}</strong></td><td>${esc(l.product)}</td><td>${stageBadge(l.stage)}</td><td style="color:${l.followup&&l.followup<todayStr?'var(--red)':'inherit'}">${l.followup?fmt(l.followup):'—'}</td></tr>`).join('')
@@ -718,7 +822,6 @@ const Dashboard={
     if(npsChart) npsChart.destroy();
     npsChart=new Chart($('chart-nps'),{type:'doughnut',data:{labels:['Promoters','Passives','Detractors'],datasets:[{data:[pr,pa,de],backgroundColor:['rgba(61,184,122,.7)','rgba(250,178,2,.7)','rgba(224,82,82,.7)'],borderColor:['#3DB87A','#FAB202','#E05252'],borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#A0A0A0',font:{size:11},boxWidth:10,padding:8}}},cutout:'62%'}});
 
-    // Admin: Esther attendance summary on dashboard
     const attSummary=$('admin-att-summary');
     if(isAdmin){
       attSummary.style.display='block';
@@ -732,14 +835,7 @@ const Dashboard={
     }
   },
 
-  clockWidgetHTML(){
-    return`<div class="clock-widget">
-      <div class="clock-widget-time" id="cw-time">--:--:--</div>
-      <div class="clock-widget-date" id="cw-date"></div>
-      <div class="clock-widget-status cws-out" id="cw-status">Not clocked in</div>
-      <div class="clock-widget-actions" id="cw-actions"></div>
-    </div>`;
-  },
+  clockWidgetHTML(){return`<div class="clock-widget"><div class="clock-widget-time" id="cw-time">--:--:--</div><div class="clock-widget-date" id="cw-date"></div><div class="clock-widget-status cws-out" id="cw-status">Not clocked in</div><div class="clock-widget-actions" id="cw-actions"></div></div>`;},
   startClockWidget(){
     if(clockWidgetTick) return;
     clockWidgetTick=setInterval(()=>{
@@ -749,7 +845,7 @@ const Dashboard={
     },1000);
   },
   updateClockWidgetStatus(){
-    const rec=Attendance.todayRecord();
+    const rec=Cache.attendance.find(r=>r.date===today()&&r.staff===Auth.current().name);
     const status=$('cw-status');const actions=$('cw-actions');
     if(!status||!actions) return;
     if(rec&&rec.clockOut){
@@ -759,11 +855,11 @@ const Dashboard={
     } else if(rec&&rec.clockIn){
       status.className=`clock-widget-status ${rec.late?'cws-late':'cws-in'}`;
       status.textContent=`Clocked in at ${rec.clockIn}${rec.late?' — Late':''}`;
-      actions.innerHTML=`<button class="btn-cout" onclick="Attendance.clockOut();Dashboard.updateClockWidgetStatus()">Clock Out</button>`;
+      actions.innerHTML=`<button class="btn-cout" onclick="Attendance.clockOut()">Clock Out</button>`;
     } else {
       status.className='clock-widget-status cws-out';
       status.textContent='Not clocked in yet';
-      actions.innerHTML=`<button class="btn-cin" onclick="Attendance.clockIn();Dashboard.updateClockWidgetStatus()">Clock In</button>`;
+      actions.innerHTML=`<button class="btn-cin" onclick="Attendance.clockIn()">Clock In</button>`;
     }
   }
 };
@@ -774,10 +870,17 @@ const Dashboard={
 const PRODUCTS=['Graduation Sash','Honour Sash','Corporate Sash','Custom Sash','Event Sash'];
 const SOURCES=['Referral','Instagram','LinkedIn','Walk-in','WhatsApp','Event','Other'];
 const Leads={
-  render(){
+  async render(){
+    if(!Cache.leads.length){
+      const raw=await GS.get('Leads');
+      Cache.leads=raw.map(rowToLead);
+    }
+    this._render();
+  },
+  _render(){
     const q=$('leads-search').value.toLowerCase();
     const sf=$('leads-stage').value;
-    let leads=DB.all('leads');
+    let leads=[...Cache.leads];
     if(q) leads=leads.filter(l=>[l.name,l.phone,l.email,l.school,l.company].join(' ').toLowerCase().includes(q));
     if(sf) leads=leads.filter(l=>l.stage===sf);
     leads.sort((a,b)=>a.name.localeCompare(b.name));
@@ -799,7 +902,7 @@ const Leads={
           <button class="btn btn-danger btn-icon btn-sm" onclick="Leads.remove('${l.id}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
         </div></td>
       </tr>`;}).join('');
-    const ov=DB.all('leads').filter(l=>l.followup&&l.followup<t&&!['Won','Lost'].includes(l.stage)).length;
+    const ov=Cache.leads.filter(l=>l.followup&&l.followup<t&&!['Won','Lost'].includes(l.stage)).length;
     ['nb-leads','bnb-leads'].forEach(id=>{const el=$(id);if(!el)return;el.textContent=ov||'';el.classList.toggle('show',ov>0);});
   },
   formHTML(l={}){
@@ -832,26 +935,60 @@ const Leads={
     return{...ex,name,phone,email:$('f-email').value.trim(),school:$('f-school').value.trim(),company:$('f-company').value.trim(),product,source:$('f-source').value,stage:$('f-stage').value||'New Lead',followup:$('f-followup').value,notes:$('f-notes').value.trim()};
   },
   openAdd(){Modal.open('Add Lead',this.formHTML(),`<button class="btn btn-ghost" onclick="Modal.close()">Cancel</button><button class="btn btn-gold" onclick="Leads.save()">Add Lead</button>`);},
-  openEdit(id){const l=DB.find('leads',id);if(!l)return;Modal.open('Edit Lead',this.formHTML(l),`<button class="btn btn-ghost" onclick="Modal.close()">Cancel</button><button class="btn btn-gold" onclick="Leads.save('${id}')">Save Changes</button>`);},
-  save(id){
-    if(id){const ex=DB.find('leads',id);const d=this.collect(ex);if(!d)return;DB.update('leads',id,d);Toast.show('Lead updated.');}
-    else{const d=this.collect({id:uid(),created:today()});if(!d)return;DB.add('leads',d);Toast.show('Lead added.');}
-    Modal.close();this.render();
+  openEdit(id){const l=Cache.leads.find(r=>r.id===id);if(!l)return;Modal.open('Edit Lead',this.formHTML(l),`<button class="btn btn-ghost" onclick="Modal.close()">Cancel</button><button class="btn btn-gold" onclick="Leads.save('${id}')">Save Changes</button>`);},
+  async save(id){
+    if(id){
+      const ex=Cache.leads.find(r=>r.id===id);
+      const d=this.collect(ex);if(!d)return;
+      const ok=await GS.update('Leads',id,d);
+      if(!ok) return;
+      const i=Cache.leads.findIndex(r=>r.id===id);
+      if(i>-1) Cache.leads[i]={...Cache.leads[i],...d};
+      Toast.show('Lead updated.');
+    }else{
+      const d=this.collect({id:uid(),created:today()});if(!d)return;
+      const ok=await GS.append('Leads',leadToRow(d));
+      if(!ok) return;
+      Cache.leads.push(d);
+      Toast.show('Lead added.');
+    }
+    Modal.close();this._render();
   },
-  remove(id){if(!confirm('Delete this lead?'))return;DB.remove('leads',id);Toast.show('Lead deleted.','info');this.render();},
+  async remove(id){
+    if(!confirm('Delete this lead?')) return;
+    const ok=await GS.delete('Leads',id);
+    if(!ok) return;
+    Cache.leads=Cache.leads.filter(r=>r.id!==id);
+    Toast.show('Lead deleted.','info');this._render();
+  },
 };
 
 /* ══════════════════════════════════════════════════
    FEEDBACK
 ══════════════════════════════════════════════════ */
 const Feedback={
-  getQuestions(){return DB.get('fb_questions')||DEFAULT_QUESTIONS;},
-  render(){
-    const all=DB.all('feedback');
+  async getQuestions(){
+    if(Cache.fbQuestions) return Cache.fbQuestions;
+    const saved=await GS.getConfig();
+    Cache.fbQuestions=saved?.fbQuestions||DEFAULT_QUESTIONS;
+    return Cache.fbQuestions;
+  },
+  async saveQuestions(qs){
+    Cache.fbQuestions=qs;
+    await GS.setConfig({fbQuestions:qs});
+  },
+  async render(){
+    if(!Cache.feedback.length){
+      const raw=await GS.get('Feedback');
+      Cache.feedback=raw.map(rowToFeedback);
+    }
+    this._render();
+  },
+  _render(){
+    const all=Cache.feedback;
     const avg=all.length?Math.round(all.reduce((a,f)=>a+f.nps,0)/all.length*10)/10:0;
     const pr=all.filter(f=>f.nps>=9).length,pa=all.filter(f=>f.nps>=7&&f.nps<9).length,de=all.filter(f=>f.nps<7).length;
-    const tm=all.filter(f=>f.testimonial).length;
-    const fr=all.filter(f=>f.framedSash).length;
+    const tm=all.filter(f=>f.testimonial).length,fr=all.filter(f=>f.framedSash).length;
     $('fb-kpis').innerHTML=`
       <div class="kpi-card kpi-gold"><div class="kpi-label">Avg NPS</div><div class="kpi-value">${all.length?avg:'—'}</div><div class="kpi-sub">${all.length} responses</div></div>
       <div class="kpi-card"><div class="kpi-label">Promoters</div><div class="kpi-value" style="color:var(--green)">${pr}</div><div class="kpi-sub">Score 9–10</div></div>
@@ -878,9 +1015,8 @@ const Feedback={
       </div></td>
     </tr>`).join('');
   },
-
-  openAdd(){
-    const qs=this.getQuestions();
+  async openAdd(){
+    const qs=await this.getQuestions();
     const po=PRODUCTS.map(p=>`<option>${esc(p)}</option>`).join('');
     const qFields=qs.map((q,i)=>`<div class="form-row"><label>Q${i+1}: ${esc(q)}</label><textarea id="fb-q-${i}" placeholder="Their answer…" style="min-height:60px"></textarea></div>`).join('');
     Modal.open('Log Achiever Feedback',`
@@ -894,30 +1030,25 @@ const Feedback={
         <div class="form-row"><label>Social Media Handle</label><input id="fb-social" placeholder="@handle"/></div>
       </div>
       <div class="form-row"><label>Birthday</label><input id="fb-bday" type="date"/></div>
-
       <div class="form-section-label">Satisfaction</div>
       <div class="nps-value-display" id="nps-display">8</div>
       <div class="nps-slider-wrap">
         <input class="nps-slider" type="range" id="fb-nps" min="0" max="10" value="8" oninput="$('nps-display').textContent=this.value"/>
         <div class="nps-labels"><span>0 — Detractor</span><span>10 — Promoter</span></div>
       </div>
-
       <div class="form-section-label">Questions</div>
       ${qFields}
-
       <div class="form-section-label">Referral</div>
       <div class="form-grid">
         <div class="form-row"><label>Referral Name</label><input id="fb-ref-name" placeholder="Who did they refer?"/></div>
         <div class="form-row"><label>Referral Phone</label><input id="fb-ref-phone" placeholder="Contact number"/></div>
       </div>
-
       <div class="form-section-label">After-Sales</div>
       <label class="form-check" style="margin-bottom:12px">
         <input type="checkbox" id="fb-framed"/>
         <span>Achiever is interested in a <strong>Framed Sash</strong></span>
       </label>
       <div class="form-row"><label>Framed Sash Note</label><input id="fb-framed-note" placeholder="e.g. Wants 8×10 gold frame"/></div>
-
       <div class="form-section-label">Other</div>
       <label class="form-check">
         <input type="checkbox" id="fb-testimonial"/>
@@ -925,13 +1056,12 @@ const Feedback={
       </label>
     `,`<button class="btn btn-ghost" onclick="Modal.close()">Cancel</button><button class="btn btn-gold" onclick="Feedback.save()">Save Feedback</button>`);
   },
-
-  save(){
+  async save(){
     const name=$('fb-name').value.trim(),order=$('fb-order').value.trim(),product=$('fb-product').value;
     if(!name||!order||!product){Toast.show('Order number, name and product are required.','error');return;}
-    const qs=this.getQuestions();
+    const qs=await this.getQuestions();
     const answers=qs.map((_,i)=>($(`fb-q-${i}`)?.value.trim()||''));
-    DB.add('feedback',{
+    const f={
       id:uid(),name,orderNo:order,product,
       socialHandle:$('fb-social').value.trim(),
       birthday:$('fb-bday').value,
@@ -943,13 +1073,15 @@ const Feedback={
       framedSash:$('fb-framed').checked,
       framedSashNote:$('fb-framed-note').value.trim(),
       date:today()
-    });
-    Modal.close();Toast.show('Feedback logged.');this.render();
+    };
+    const ok=await GS.append('Feedback',feedbackToRow(f));
+    if(!ok) return;
+    Cache.feedback.push(f);
+    Modal.close();Toast.show('Feedback logged.');this._render();
   },
-
   openView(id){
-    const f=DB.find('feedback',id);if(!f)return;
-    const qs=this.getQuestions();
+    const f=Cache.feedback.find(r=>r.id===id);if(!f)return;
+    const qs=Cache.fbQuestions||DEFAULT_QUESTIONS;
     const answers=(f.answers||[]);
     const qaHTML=qs.map((q,i)=>`
       <div style="margin-bottom:14px">
@@ -970,36 +1102,33 @@ const Feedback={
         ${f.referralName?`<div><div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:4px">Referral</div>${esc(f.referralName)} ${f.referralPhone?'· '+esc(f.referralPhone):''}</div>`:''}
         ${f.framedSashNote?`<div><div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:4px">Frame Note</div>${esc(f.framedSashNote)}</div>`:''}
       </div>
-      <div class="form-section-label" style="margin-top:0">Feedback Answers</div>
-      ${qaHTML}
+      <div class="form-section-label" style="margin-top:0">Feedback Answers</div>${qaHTML}
     `,`<button class="btn btn-ghost" onclick="Modal.close()">Close</button>`);
   },
-
-  remove(id){if(!confirm('Delete this feedback?'))return;DB.remove('feedback',id);Toast.show('Feedback deleted.','info');this.render();},
-
-  openEditQuestions(){
-    const qs=this.getQuestions();
+  async remove(id){
+    if(!confirm('Delete this feedback?')) return;
+    const ok=await GS.delete('Feedback',id);
+    if(!ok) return;
+    Cache.feedback=Cache.feedback.filter(r=>r.id!==id);
+    Toast.show('Feedback deleted.','info');this._render();
+  },
+  async openEditQuestions(){
+    let qs=[...await this.getQuestions()];
     const renderList=()=>{
       const list=$('fq-list');if(!list)return;
       list.innerHTML=qs.map((q,i)=>`
-        <div class="fq-item">
-          <span>${esc(q)}</span>
-          <span class="fq-remove" onclick="FeedbackQS.remove(${i})">×</span>
-        </div>`).join('');
+        <div class="fq-item"><span>${esc(q)}</span><span class="fq-remove" onclick="FQS.remove(${i})">×</span></div>`).join('');
     };
-    window.FeedbackQS={
-      qs:[...qs],
-      remove(i){this.qs.splice(i,1);DB.set('fb_questions',this.qs);renderList();},
-      add(){const v=$('fq-input').value.trim();if(!v)return;this.qs.push(v);DB.set('fb_questions',this.qs);$('fq-input').value='';renderList();},
+    window.FQS={
+      remove(i){qs.splice(i,1);renderList();},
+      add(){const v=$('fq-input').value.trim();if(!v)return;qs.push(v);$('fq-input').value='';renderList();},
+      async done(){await Feedback.saveQuestions(qs);Modal.close();Toast.show('Questions saved.');}
     };
     Modal.open('Edit Feedback Questions',`
-      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">These questions appear in every feedback form. Add, remove, or reorder as needed.</p>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">These questions appear in every feedback form.</p>
       <div class="fq-list" id="fq-list"></div>
-      <div class="fq-add">
-        <input id="fq-input" placeholder="Type a new question…" onkeydown="if(event.key==='Enter')FeedbackQS.add()"/>
-        <button class="btn btn-gold btn-sm" onclick="FeedbackQS.add()">Add</button>
-      </div>
-    `,`<button class="btn btn-gold" onclick="Modal.close()">Done</button>`);
+      <div class="fq-add"><input id="fq-input" placeholder="Type a new question…" onkeydown="if(event.key==='Enter')FQS.add()"/><button class="btn btn-gold btn-sm" onclick="FQS.add()">Add</button></div>
+    `,`<button class="btn btn-gold" onclick="FQS.done()">Save Questions</button>`);
     renderList();
   },
 };
@@ -1009,36 +1138,16 @@ const Feedback={
 ══════════════════════════════════════════════════ */
 const GRACE_HOUR=8,GRACE_MIN=15;
 const Attendance={
-  todayRecord(){
-    const user=Auth.current();
-    return DB.all('attendance').find(r=>r.date===today()&&r.staff===user.name);
+  async render(){
+    const raw=await GS.get('Attendance');
+    Cache.attendance=raw.map(rowToAtt);
+    this._render();
   },
-  clockIn(){
-    if(this.todayRecord()){Toast.show('Already clocked in today.','info');return;}
-    const now=new Date();
-    const ts=`${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
-    const late=now.getHours()>GRACE_HOUR||(now.getHours()===GRACE_HOUR&&now.getMinutes()>GRACE_MIN);
-    DB.add('attendance',{id:uid(),staff:Auth.current().name,date:today(),clockIn:ts,clockOut:null,hours:0,late});
-    Toast.show(`Clocked in at ${ts}${late?' (late)':''}.`);
-  },
-  clockOut(){
-    const rec=this.todayRecord();
-    if(!rec){Toast.show('Clock in first.','error');return;}
-    if(rec.clockOut){Toast.show('Already clocked out.','info');return;}
-    const now=new Date();
-    const ts=`${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
-    const [ih,im]=rec.clockIn.split(':').map(Number);
-    const hrs=((now.getHours()*60+now.getMinutes())-(ih*60+im))/60;
-    DB.update('attendance',rec.id,{clockOut:ts,hours:Math.round(hrs*10)/10});
-    Toast.show(`Clocked out at ${ts}. ${Math.round(hrs*10)/10}h logged.`);
-  },
-  render(){
-    // Admin-only view
+  _render(){
     const thisMonth=today().slice(0,7);
-    const records=DB.all('attendance').filter(r=>r.date.startsWith(thisMonth));
+    const records=Cache.attendance.filter(r=>r.date.startsWith(thisMonth));
     records.sort((a,b)=>b.date.localeCompare(a.date));
-    const present=records.length;
-    const late=records.filter(r=>r.late).length;
+    const present=records.length,late=records.filter(r=>r.late).length;
     const totalHrs=records.reduce((a,r)=>a+(r.hours||0),0);
     $('att-kpis').innerHTML=`
       <div class="kpi-card kpi-gold"><div class="kpi-label">Days Present</div><div class="kpi-value">${present}</div><div class="kpi-sub">This month</div></div>
@@ -1049,12 +1158,40 @@ const Attendance={
     const tbody=$('att-tbody');
     if(!records.length){tbody.innerHTML=`<tr><td colspan="5" class="tbl-empty">No attendance records this month.</td></tr>`;return;}
     tbody.innerHTML=records.map(r=>`<tr>
-      <td>${fmt(r.date)}</td>
-      <td>${esc(r.clockIn)}</td>
+      <td>${fmt(r.date)}</td><td>${esc(r.clockIn)}</td>
       <td>${r.clockOut?esc(r.clockOut):'<span style="color:var(--text3)">In progress</span>'}</td>
       <td>${r.hours?r.hours.toFixed(1)+'h':'—'}</td>
       <td>${r.late?'<span class="badge badge-red">Late</span>':'<span class="badge badge-green">On time</span>'}</td>
     </tr>`).join('');
+  },
+  todayRecord(){return Cache.attendance.find(r=>r.date===today()&&r.staff===Auth.current().name);},
+  async clockIn(){
+    if(this.todayRecord()){Toast.show('Already clocked in today.','info');return;}
+    const now=new Date();
+    const ts=`${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+    const late=now.getHours()>GRACE_HOUR||(now.getHours()===GRACE_HOUR&&now.getMinutes()>GRACE_MIN);
+    const rec={id:uid(),staff:Auth.current().name,date:today(),clockIn:ts,clockOut:null,hours:0,late};
+    const ok=await GS.append('Attendance',attToRow(rec));
+    if(!ok) return;
+    Cache.attendance.push(rec);
+    Toast.show(`Clocked in at ${ts}${late?' (late)':''}.`);
+    Dashboard.updateClockWidgetStatus();
+  },
+  async clockOut(){
+    const rec=this.todayRecord();
+    if(!rec){Toast.show('Clock in first.','error');return;}
+    if(rec.clockOut){Toast.show('Already clocked out.','info');return;}
+    const now=new Date();
+    const ts=`${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+    const[ih,im]=rec.clockIn.split(':').map(Number);
+    const hrs=((now.getHours()*60+now.getMinutes())-(ih*60+im))/60;
+    const updates={clockOut:ts,hours:Math.round(hrs*10)/10};
+    const ok=await GS.update('Attendance',rec.id,updates);
+    if(!ok) return;
+    const i=Cache.attendance.findIndex(r=>r.id===rec.id);
+    if(i>-1) Cache.attendance[i]={...Cache.attendance[i],...updates};
+    Toast.show(`Clocked out at ${ts}. ${Math.round(hrs*10)/10}h logged.`);
+    Dashboard.updateClockWidgetStatus();
   },
 };
 
@@ -1066,24 +1203,27 @@ function closeSidebar(){$('sidebar').classList.remove('open');$('sidebar-overlay
 const App={
   showLogin(){
     $('login-screen').style.display='flex';
-    $('app').classList.remove('active');
+    $('app').style.display='none';
     $('l-email').value='';$('l-pass').value='';
     $('login-error').style.display='none';
-    if(clockWidgetTick){clearInterval(clockWidgetTick);clockWidgetTick=null;}
   },
   showApp(){
     $('login-screen').style.display='none';
-    $('app').classList.add('active');
+    $('app').style.display='flex';
     const user=Auth.current();
     $('sb-name').textContent=user.name;
     $('sb-role').textContent=user.role;
     $('sb-avatar').textContent=user.name[0];
-    seedIfEmpty();
     buildNav();
     Router.go('dashboard');
   },
   init(){
     ['l-email','l-pass'].forEach(id=>{$(id)?.addEventListener('keydown',e=>{if(e.key==='Enter') Auth.login();});});
+    // Check if Google Sheets URL is configured
+    if(!Setup.getURL()){
+      $('setup-screen').classList.add('open');
+      return;
+    }
     const s=Auth.current();
     if(s) this.showApp();
     else this.showLogin();
