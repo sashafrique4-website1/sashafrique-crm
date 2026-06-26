@@ -497,22 +497,9 @@ const pad2=n=>String(n).padStart(2,'0');
 
 /* ── SETUP ─────────────────────────────────────────── */
 const Setup={
-  getURL(){return localStorage.getItem('gs_url')||'';},
-  save(){
-    const url=$('setup-url').value.trim();
-    if(!url||!url.includes('script.google.com')){
-      Toast.show('Please paste a valid Apps Script URL.','error');return;
-    }
-    localStorage.setItem('gs_url',url);
-    $('setup-screen').classList.remove('open');
-    App.showLogin();
-    Toast.show('Google Sheets connected!','success');
-  },
-  reset(){
-    if(!confirm('Disconnect Google Sheets? All local data stays in the Sheet.')) return;
-    localStorage.removeItem('gs_url');
-    location.reload();
-  }
+  getURL(){return 'https://script.google.com/macros/s/AKfycbzGrAhhWGeihdBB_BOg4DEICUlxH-mK-M-iPe3Ro7CWlIgh0MprgSCHVDC6FNtHBuOU/exec';},
+  save(){Toast.show('Already connected to Google Sheets.','info');},
+  reset(){Toast.show('Sheet URL is hardcoded — contact Nana to update it.','info');}
 };
 
 /* ── GOOGLE SHEETS API ─────────────────────────────── */
@@ -1219,11 +1206,6 @@ const App={
   },
   init(){
     ['l-email','l-pass'].forEach(id=>{$(id)?.addEventListener('keydown',e=>{if(e.key==='Enter') Auth.login();});});
-    // Check if Google Sheets URL is configured
-    if(!Setup.getURL()){
-      $('setup-screen').classList.add('open');
-      return;
-    }
     const s=Auth.current();
     if(s) this.showApp();
     else this.showLogin();
