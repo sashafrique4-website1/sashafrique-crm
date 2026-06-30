@@ -769,7 +769,7 @@ function rowToLead(r){
 function callToRow(c){return[c.id,c.name,c.orderNo,c.date,c.time,c.outcome,c.staff,c.notes];}
 function rowToCall(r){return{id:r.id,name:r.name||'',orderNo:r.orderNo||'',date:r.date||'',time:r.time||'',outcome:r.outcome||'',staff:r.staff||'',notes:r.notes||''};}
 function feedbackToRow(f){
-  return[f.id,f.name,f.orderNo,f.product,f.csat,f.nps,f.emotionalResponse,f.productQuality,f.serviceRating,
+  return[f.id,f.name,f.orderNo,f.product,f.socialHandle||'',f.birthday||'',f.csat,f.nps,f.emotionalResponse,f.productQuality,f.serviceRating,
     f.deliveryOk?'TRUE':'FALSE',f.deliveryIssue||'',f.improvement||'',
     f.referralWilling?'TRUE':'FALSE',f.referralName||'',f.referralPhone||'',
     f.futureOpportunity?'TRUE':'FALSE',f.futureNotes||'',
@@ -781,6 +781,7 @@ function feedbackToRow(f){
 }
 function rowToFeedback(r){
   return{id:r.id,name:r.name,orderNo:r.orderNo,product:r.product,
+    socialHandle:r.socialHandle||'',birthday:r.birthday||'',
     csat:+r.csat||0,nps:+r.nps||0,
     emotionalResponse:r.emotionalResponse||'',productQuality:r.productQuality||'',serviceRating:r.serviceRating||'',
     deliveryOk:r.deliveryOk==='TRUE'||r.deliveryOk===true,deliveryIssue:r.deliveryIssue||'',
@@ -1086,7 +1087,7 @@ const Feedback={
       const nLbl=f.nps>=9?'Promoter':f.nps>=7?'Passive':'Detractor';
       const asList=[f.interestedFramed?'Framed':'',f.interestedAnotherSash?'Sash':'',f.interestedCorporate?'Corp':'',f.wantsCallback?'Call':''].filter(Boolean);
       return`<tr>
-        <td><strong>${esc(f.name)}</strong></td>
+        <td><strong>${esc(f.name)}</strong>${f.socialHandle?`<div style="font-size:11px;color:var(--text2)">${esc(f.socialHandle)}</div>`:''}</td>
         <td>${f.orderNo?`<span class="badge badge-grey">${esc(f.orderNo)}</span>`:'—'}</td>
         <td>${esc(f.product)}</td>
         <td><span class="badge ${f.csat>=9?'badge-green':f.csat>=7?'badge-gold':'badge-red'}">${f.csat}/10</span></td>
@@ -1166,6 +1167,10 @@ const Feedback={
         <div class="form-row"><label>Achiever Name *</label><input id="fb-name" placeholder="Full name"/></div>
       </div>
       <div class="form-row"><label>Product *</label><select id="fb-product"><option value="">— select —</option>${po}</select></div>
+      <div class="form-grid">
+        <div class="form-row"><label>Social Media Handle</label><input id="fb-social" placeholder="@handle"/></div>
+        <div class="form-row"><label>Birthday</label><input id="fb-bday" type="date"/></div>
+      </div>
       <div class="form-section-label" style="margin-top:20px">§1 — Overall Satisfaction (CSAT)</div>
       <div style="font-size:13px;color:var(--text2);margin-bottom:10px">"On a scale of 1–10, how satisfied were you with your overall experience?"</div>
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px">
@@ -1254,6 +1259,8 @@ const Feedback={
     const rv=n=>document.querySelector('input[name="'+n+'"]:checked')?.value||'';
     const f={
       id:uid(),name,orderNo:order,product,
+      socialHandle:$('fb-social').value.trim(),
+      birthday:$('fb-bday').value,
       csat:+$('fb-csat').value,nps:+$('fb-nps').value,
       emotionalResponse:$('fb-emotion').value.trim(),
       productQuality:rv('fb-quality'),serviceRating:rv('fb-service'),
@@ -1299,6 +1306,8 @@ const Feedback={
         <div><div class="fb-view-label">Product</div>${esc(f.product)}</div>
         <div><div class="fb-view-label">Date</div>${fmt(f.date)}</div>
         <div><div class="fb-view-label">Delivery OK?</div>${f.deliveryOk?'Yes':'No'}</div>
+        ${f.socialHandle?`<div><div class="fb-view-label">Social Media</div>${esc(f.socialHandle)}</div>`:''}
+        ${f.birthday?`<div><div class="fb-view-label">Birthday</div>${fmt(f.birthday)}</div>`:''}
       </div>
       ${f.emotionalResponse?`<div class="fb-quote-block">&ldquo;${esc(f.emotionalResponse)}&rdquo;</div>`:''}
       ${(f.productQuality||f.serviceRating)?`<div class="form-section-label">Ratings</div><div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px">${f.productQuality?`<div><div class="fb-view-label">Product Quality</div><span class="badge badge-grey">${esc(f.productQuality)}</span></div>`:''} ${f.serviceRating?`<div><div class="fb-view-label">Service</div><span class="badge badge-grey">${esc(f.serviceRating)}</span></div>`:''} ${f.deliveryIssue?`<div style="flex:1"><div class="fb-view-label">Delivery Issue</div><div style="font-size:13px;color:var(--red)">${esc(f.deliveryIssue)}</div></div>`:''}</div>`:''}
