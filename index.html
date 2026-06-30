@@ -31,6 +31,17 @@ img{display:block;max-width:100%}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
+/* ── FEEDBACK UI & CALL LOG ─────────────────── */
+.fb-score-display{min-width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold);background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);flex-shrink:0;transition:color var(--trans);}
+.fb-pill-group{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
+.fb-pill{cursor:pointer;}
+.fb-pill input{display:none;}
+.fb-pill span{display:inline-flex;align-items:center;padding:7px 14px;border-radius:99px;font-size:13px;font-weight:500;border:1.5px solid var(--border);color:var(--text2);background:var(--surface2);transition:all var(--trans);cursor:pointer;}
+.fb-pill input:checked + span{background:var(--gold-faint);border-color:var(--gold);color:var(--gold);}
+.fb-pill:hover span{border-color:var(--text3);color:var(--text);}
+.fb-quote-block{font-family:'Playfair Display',serif;font-size:15px;font-style:italic;color:var(--text);padding:14px 18px;border-left:3px solid var(--gold);background:var(--surface2);border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin-bottom:18px;line-height:1.6;}
+.fb-view-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:4px;}
+.kpi-clickable:hover{border-color:var(--gold)!important;transform:translateY(-2px);box-shadow:0 4px 20px rgba(250,178,2,.12);}
 /* LOGIN */
 #login-screen{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:var(--bg);}
 .login-bg{position:absolute;inset:0;overflow:hidden;}
@@ -422,24 +433,63 @@ select.filter-sel:focus{border-color:var(--gold);}
       <!-- FEEDBACK -->
       <div class="view" id="view-feedback">
         <div class="page-header">
-          <div class="page-header-left"><h2>Achiever Feedback</h2><p>Capture satisfaction, referrals and after-sales care.</p></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-ghost btn-sm" onclick="Feedback.openEditQuestions()">
-              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
-              Edit Questions
-            </button>
-            <button class="btn btn-gold btn-sm" onclick="Feedback.openAdd()">
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-              Log Feedback
-            </button>
+          <div class="page-header-left"><h2>Achiever Feedback</h2><p>Satisfaction, referrals, testimonials &amp; after-sales intelligence.</p></div>
+          <button class="btn btn-gold btn-sm" onclick="Feedback.openAdd()">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Log Feedback
+          </button>
+        </div>
+        <!-- NPS BANNER -->
+        <div id="fb-nps-banner" style="display:none;margin-bottom:20px;padding:18px 24px;border-radius:var(--radius);background:linear-gradient(135deg,rgba(250,178,2,.08),rgba(250,178,2,.03));border:1px solid rgba(250,178,2,.18);display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:4px">True NPS Score</div>
+            <div id="fb-nps-score-big" style="font-family:'Playfair Display',serif;font-size:42px;font-weight:700;color:var(--gold);line-height:1">—</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px">Promoters % − Detractors % · Scale −100 to +100</div>
+          </div>
+          <div style="flex:1;min-width:200px">
+            <div style="display:flex;gap:6px;margin-bottom:8px">
+              <div id="fb-bar-pr" style="height:8px;background:var(--green);border-radius:4px 0 0 4px;transition:width .5s ease;min-width:2px;width:0"></div>
+              <div id="fb-bar-pa" style="height:8px;background:var(--gold);transition:width .5s ease;min-width:2px;width:0"></div>
+              <div id="fb-bar-de" style="height:8px;background:var(--red);border-radius:0 4px 4px 0;transition:width .5s ease;min-width:2px;width:0"></div>
+            </div>
+            <div style="display:flex;gap:16px;font-size:12px;color:var(--text2)">
+              <span><span style="color:var(--green)">●</span> <span id="fb-pr-pct">0%</span> Promoters</span>
+              <span><span style="color:var(--gold)">●</span> <span id="fb-pa-pct">0%</span> Passives</span>
+              <span><span style="color:var(--red)">●</span> <span id="fb-de-pct">0%</span> Detractors</span>
+            </div>
           </div>
         </div>
         <div class="kpi-grid" id="fb-kpis"></div>
+        <!-- CX INSIGHTS -->
+        <div id="fb-insights" style="display:none;margin-bottom:20px">
+          <h3 style="font-family:'Playfair Display',serif;font-size:16px;margin-bottom:14px;color:var(--text)">Customer Experience Insights</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px" id="fb-insights-grid"></div>
+        </div>
         <div class="card">
           <div class="tbl-wrap">
             <table>
-              <thead><tr><th>Achiever</th><th>Order #</th><th>Product</th><th>NPS</th><th>Framed Sash?</th><th>Date</th><th></th></tr></thead>
+              <thead><tr><th>Achiever</th><th>Order #</th><th>Product</th><th>CSAT</th><th>NPS</th><th>Referral</th><th>Testimonial</th><th>After-Sales</th><th>Follow-up</th><th>Date</th><th></th></tr></thead>
               <tbody id="feedback-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CALL LOG -->
+      <div class="view" id="view-calllog">
+        <div class="page-header">
+          <div class="page-header-left"><h2>Call Log</h2><p>Track every call attempt to Achievers — answered or not.</p></div>
+          <button class="btn btn-gold btn-sm" onclick="CallLog.openAdd()">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Log Call
+          </button>
+        </div>
+        <div class="kpi-grid" id="cl-kpis"></div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Achiever</th><th>Order #</th><th>Date</th><th>Time</th><th>Outcome</th><th>Staff</th><th>Notes</th><th></th></tr></thead>
+              <tbody id="calllog-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -584,18 +634,8 @@ const SyncBar={
 
 /* ── IN-MEMORY CACHE ───────────────────────────────── */
 const Cache={
-  leads:[],feedback:[],attendance:[],
-  fbQuestions:null,
+  leads:[],feedback:[],attendance:[],calllog:[],
 };
-
-/* ── DEFAULT FEEDBACK QUESTIONS ────────────────────── */
-const DEFAULT_QUESTIONS=[
-  'How would you describe your overall experience with us?',
-  'Was the quality of your sash what you expected?',
-  'Was delivery/collection on time?',
-  'Would you recommend Sash Afrique to a friend or colleague?',
-  'Is there anything we could have done better?',
-];
 
 /* ── AUTH ──────────────────────────────────────────── */
 const USERS=[
@@ -653,8 +693,8 @@ const Modal={
 };
 
 /* ── ROUTER ────────────────────────────────────────── */
-const VIEWS_ADMIN={dashboard:{title:'Dashboard'},leads:{title:'Leads'},feedback:{title:'Achiever Feedback'},attendance:{title:'Attendance Report'}};
-const VIEWS_OFFICER={dashboard:{title:'Dashboard'},leads:{title:'Leads'},feedback:{title:'Achiever Feedback'}};
+const VIEWS_ADMIN={dashboard:{title:'Dashboard'},leads:{title:'Leads'},feedback:{title:'Achiever Feedback'},calllog:{title:'Call Log'},attendance:{title:'Attendance Report'}};
+const VIEWS_OFFICER={dashboard:{title:'Dashboard'},leads:{title:'Leads'},feedback:{title:'Achiever Feedback'},calllog:{title:'Call Log'}};
 const Router={
   current:'dashboard',
   async go(v){
@@ -670,6 +710,7 @@ const Router={
     if(v==='dashboard') await Dashboard.render();
     else if(v==='leads') await Leads.render();
     else if(v==='feedback') await Feedback.render();
+    else if(v==='calllog') await CallLog.render();
     else if(v==='attendance') await Attendance.render();
     Modal.close();closeSidebar();window.scrollTo(0,0);
   }
@@ -681,12 +722,13 @@ const NAV_ICONS={
   leads:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.125-1.28-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.125-1.28.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
   feedback:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>',
   attendance:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+  calllog:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>',
 };
 function buildNav(){
   const isAdmin=Auth.isAdmin();
-  const items=isAdmin?['dashboard','leads','feedback','attendance']:['dashboard','leads','feedback'];
-  const labels={dashboard:'Dashboard',leads:'Leads',feedback:'Feedback',attendance:'Attendance'};
-  const bnavLabels={dashboard:'Home',leads:'Leads',feedback:'Feedback',attendance:'Reports'};
+  const items=isAdmin?['dashboard','leads','feedback','calllog','attendance']:['dashboard','leads','feedback','calllog'];
+  const labels={dashboard:'Dashboard',leads:'Leads',feedback:'Feedback',calllog:'Calls',attendance:'Attendance'};
+  const bnavLabels={dashboard:'Home',leads:'Leads',feedback:'Feedback',calllog:'Calls',attendance:'Reports'};
   $('sidebar-nav-items').innerHTML=`
     <div class="nav-section-label">Overview</div>
     ${items.map(v=>`
@@ -724,13 +766,36 @@ function leadToRow(l){
 function rowToLead(r){
   return{id:r.id,name:r.name,phone:r.phone,email:r.email,school:r.school,programme:r.programme||'',company:r.company,product:r.product,source:r.source,stage:r.stage,followup:r.followup||'',notes:r.notes,created:r.created};
 }
+function callToRow(c){return[c.id,c.name,c.orderNo,c.date,c.time,c.outcome,c.staff,c.notes];}
+function rowToCall(r){return{id:r.id,name:r.name||'',orderNo:r.orderNo||'',date:r.date||'',time:r.time||'',outcome:r.outcome||'',staff:r.staff||'',notes:r.notes||''};}
 function feedbackToRow(f){
-  return[f.id,f.name,f.orderNo,f.product,f.socialHandle,f.birthday,f.nps,JSON.stringify(f.answers),f.testimonial?'TRUE':'FALSE',f.referralName,f.referralPhone,f.framedSash?'TRUE':'FALSE',f.framedSashNote,f.date];
+  return[f.id,f.name,f.orderNo,f.product,f.csat,f.nps,f.emotionalResponse,f.productQuality,f.serviceRating,
+    f.deliveryOk?'TRUE':'FALSE',f.deliveryIssue||'',f.improvement||'',
+    f.referralWilling?'TRUE':'FALSE',f.referralName||'',f.referralPhone||'',
+    f.futureOpportunity?'TRUE':'FALSE',f.futureNotes||'',
+    f.testimonialPermission?'TRUE':'FALSE',f.testimonialText||'',
+    f.interestedFramed?'TRUE':'FALSE',f.interestedAnotherSash?'TRUE':'FALSE',
+    f.interestedCorporate?'TRUE':'FALSE',f.wantsCallback?'TRUE':'FALSE',
+    f.complaintsRaised?'TRUE':'FALSE',f.complaintsResolved?'TRUE':'FALSE',
+    f.followupRequired?'TRUE':'FALSE',f.date];
 }
 function rowToFeedback(r){
-  let answers=[];
-  try{answers=JSON.parse(r.answers||'[]');}catch(e){}
-  return{id:r.id,name:r.name,orderNo:r.orderNo,product:r.product,socialHandle:r.socialHandle||'',birthday:r.birthday||'',nps:+r.nps||0,answers,testimonial:r.testimonial==='TRUE'||r.testimonial===true,referralName:r.referralName||'',referralPhone:r.referralPhone||'',framedSash:r.framedSash==='TRUE'||r.framedSash===true,framedSashNote:r.framedSashNote||'',date:r.date};
+  return{id:r.id,name:r.name,orderNo:r.orderNo,product:r.product,
+    csat:+r.csat||0,nps:+r.nps||0,
+    emotionalResponse:r.emotionalResponse||'',productQuality:r.productQuality||'',serviceRating:r.serviceRating||'',
+    deliveryOk:r.deliveryOk==='TRUE'||r.deliveryOk===true,deliveryIssue:r.deliveryIssue||'',
+    improvement:r.improvement||'',
+    referralWilling:r.referralWilling==='TRUE'||r.referralWilling===true,referralName:r.referralName||'',referralPhone:r.referralPhone||'',
+    futureOpportunity:r.futureOpportunity==='TRUE'||r.futureOpportunity===true,futureNotes:r.futureNotes||'',
+    testimonialPermission:r.testimonialPermission==='TRUE'||r.testimonialPermission===true,testimonialText:r.testimonialText||'',
+    interestedFramed:r.interestedFramed==='TRUE'||r.interestedFramed===true,
+    interestedAnotherSash:r.interestedAnotherSash==='TRUE'||r.interestedAnotherSash===true,
+    interestedCorporate:r.interestedCorporate==='TRUE'||r.interestedCorporate===true,
+    wantsCallback:r.wantsCallback==='TRUE'||r.wantsCallback===true,
+    complaintsRaised:r.complaintsRaised==='TRUE'||r.complaintsRaised===true,
+    complaintsResolved:r.complaintsResolved==='TRUE'||r.complaintsResolved===true,
+    followupRequired:r.followupRequired==='TRUE'||r.followupRequired===true,
+    date:r.date};
 }
 function attToRow(a){
   return[a.id,a.staff,a.date,a.clockIn,a.clockOut||'',a.hours||0,a.late?'TRUE':'FALSE'];
@@ -759,7 +824,9 @@ const Dashboard={
     const openLeads=leads.filter(l=>!['Won','Lost'].includes(l.stage));
     const wonLeads=leads.filter(l=>l.stage==='Won');
     const overdueLeads=openLeads.filter(l=>l.followup&&l.followup<todayStr);
-    const avgNps=fb.length?Math.round(fb.reduce((a,f)=>a+f.nps,0)/fb.length*10)/10:0;
+    const csatAvgD=fb.length?Math.round(fb.reduce((a,f)=>a+(f.csat||0),0)/fb.length*10)/10:0;
+    const prD=fb.filter(f=>f.nps>=9).length,deD=fb.filter(f=>f.nps<7).length;
+    const trueNps=fb.length?Math.round(((prD/fb.length)-(deD/fb.length))*100):null;
     const todayAtt=att.filter(a=>a.date===todayStr);
 
     const cw=$('officer-clock-widget');
@@ -777,7 +844,8 @@ const Dashboard={
         <div class="kpi-card kpi-gold"><div class="kpi-label">Open Leads</div><div class="kpi-value">${openLeads.length}</div><div class="kpi-sub">${leads.length} total</div></div>
         <div class="kpi-card"><div class="kpi-label">Won</div><div class="kpi-value">${wonLeads.length}</div><div class="kpi-sub">Closed successfully</div></div>
         <div class="kpi-card"><div class="kpi-label">Follow-ups Due</div><div class="kpi-value" style="color:${overdueLeads.length?'var(--red)':'var(--green)'}">${overdueLeads.length}</div><div class="kpi-sub">Overdue</div></div>
-        <div class="kpi-card"><div class="kpi-label">Avg NPS</div><div class="kpi-value">${fb.length?avgNps:'—'}</div><div class="kpi-sub">${fb.length} responses</div></div>
+        <div class="kpi-card"><div class="kpi-label">CSAT</div><div class="kpi-value">${fb.length?csatAvgD+'/10':'—'}</div><div class="kpi-sub">${fb.length} responses</div></div>
+        <div class="kpi-card"><div class="kpi-label">True NPS</div><div class="kpi-value" style="color:${trueNps===null?'inherit':trueNps>=50?'var(--green)':trueNps>=0?'var(--gold)':'var(--red)'}">${trueNps!==null?(trueNps>=0?'+':'')+trueNps:'—'}</div><div class="kpi-sub">−100 to +100</div></div>
         <div class="kpi-card"><div class="kpi-label">Esther In Today</div><div class="kpi-value">${todayAtt.length?'Yes':'No'}</div><div class="kpi-sub">${todayAtt.length?`at ${todayAtt[0].clockIn}`:'Not yet'}</div></div>
       `;
     } else {
@@ -785,7 +853,7 @@ const Dashboard={
         <div class="kpi-card kpi-gold"><div class="kpi-label">My Open Leads</div><div class="kpi-value">${openLeads.length}</div><div class="kpi-sub">${leads.length} total</div></div>
         <div class="kpi-card"><div class="kpi-label">Follow-ups Due</div><div class="kpi-value" style="color:${overdueLeads.length?'var(--red)':'var(--green)'}">${overdueLeads.length}</div><div class="kpi-sub">Overdue</div></div>
         <div class="kpi-card"><div class="kpi-label">Feedback Logged</div><div class="kpi-value">${fb.length}</div><div class="kpi-sub">Total responses</div></div>
-        <div class="kpi-card"><div class="kpi-label">Avg NPS</div><div class="kpi-value">${fb.length?avgNps:'—'}</div><div class="kpi-sub">Score</div></div>
+        <div class="kpi-card"><div class="kpi-label">True NPS</div><div class="kpi-value" style="color:${trueNps===null?'inherit':trueNps>=50?'var(--green)':trueNps>=0?'var(--gold)':'var(--red)'}">${trueNps!==null?(trueNps>=0?'+':'')+trueNps:'—'}</div><div class="kpi-sub">Score</div></div>
       `;
     }
 
@@ -954,169 +1022,391 @@ const Leads={
    FEEDBACK
 ══════════════════════════════════════════════════ */
 const Feedback={
-  async getQuestions(){
-    if(Cache.fbQuestions) return Cache.fbQuestions;
-    const saved=await GS.getConfig();
-    Cache.fbQuestions=saved?.fbQuestions||DEFAULT_QUESTIONS;
-    return Cache.fbQuestions;
-  },
-  async saveQuestions(qs){
-    Cache.fbQuestions=qs;
-    await GS.setConfig({fbQuestions:qs});
-  },
   async render(){
-    if(!Cache.feedback.length){
-      const raw=await GS.get('Feedback');
-      Cache.feedback=raw.map(rowToFeedback);
-    }
+    if(!Cache.feedback.length){const raw=await GS.get('Feedback');Cache.feedback=raw.map(rowToFeedback);}
     this._render();
   },
   _render(){
-    const all=Cache.feedback;
-    const avg=all.length?Math.round(all.reduce((a,f)=>a+f.nps,0)/all.length*10)/10:0;
+    const all=Cache.feedback,n=all.length;
     const pr=all.filter(f=>f.nps>=9).length,pa=all.filter(f=>f.nps>=7&&f.nps<9).length,de=all.filter(f=>f.nps<7).length;
-    const tm=all.filter(f=>f.testimonial).length,fr=all.filter(f=>f.framedSash).length;
+    const npsScore=n?Math.round(((pr/n)-(de/n))*100):null;
+    const csatAvg=n?Math.round(all.reduce((a,f)=>a+(f.csat||0),0)/n*10)/10:null;
+    const testimonials=all.filter(f=>f.testimonialPermission).length;
+    const referrals=all.filter(f=>f.referralWilling).length;
+    const afterSales=all.filter(f=>f.interestedFramed||f.interestedAnotherSash||f.interestedCorporate).length;
+    const complaintsR=all.filter(f=>f.complaintsRaised).length;
+    const complaintsX=all.filter(f=>f.complaintsResolved).length;
+    const repeatBiz=all.filter(f=>f.futureOpportunity).length;
+    const followups=all.filter(f=>f.followupRequired||f.wantsCallback).length;
+
+    const banner=$('fb-nps-banner');
+    if(n>0){
+      banner.style.display='flex';
+      $('fb-nps-score-big').textContent=(npsScore>=0?'+':'')+npsScore;
+      $('fb-nps-score-big').style.color=npsScore>=50?'var(--green)':npsScore>=0?'var(--gold)':'var(--red)';
+      const prP=Math.round(pr/n*100),paP=Math.round(pa/n*100),deP=Math.round(de/n*100);
+      $('fb-bar-pr').style.width=prP+'%';$('fb-bar-pa').style.width=paP+'%';$('fb-bar-de').style.width=deP+'%';
+      $('fb-pr-pct').textContent=prP+'%';$('fb-pa-pct').textContent=paP+'%';$('fb-de-pct').textContent=deP+'%';
+    }else{banner.style.display='none';}
+
     $('fb-kpis').innerHTML=`
-      <div class="kpi-card kpi-gold"><div class="kpi-label">Avg NPS</div><div class="kpi-value">${all.length?avg:'—'}</div><div class="kpi-sub">${all.length} responses</div></div>
-      <div class="kpi-card"><div class="kpi-label">Promoters</div><div class="kpi-value" style="color:var(--green)">${pr}</div><div class="kpi-sub">Score 9–10</div></div>
-      <div class="kpi-card"><div class="kpi-label">Passives</div><div class="kpi-value" style="color:var(--gold)">${pa}</div><div class="kpi-sub">Score 7–8</div></div>
-      <div class="kpi-card"><div class="kpi-label">Detractors</div><div class="kpi-value" style="color:var(--red)">${de}</div><div class="kpi-sub">Score 0–6</div></div>
-      <div class="kpi-card"><div class="kpi-label">Testimonials</div><div class="kpi-value">${tm}</div><div class="kpi-sub">Captured</div></div>
-      <div class="kpi-card"><div class="kpi-label">Framed Sash</div><div class="kpi-value">${fr}</div><div class="kpi-sub">After-sales interest</div></div>
+      <div class="kpi-card kpi-gold"><div class="kpi-label">CSAT Score</div><div class="kpi-value">${csatAvg!==null?csatAvg+'/10':'—'}</div><div class="kpi-sub">${n} responses</div></div>
+      <div class="kpi-card kpi-clickable" onclick="Feedback.drilldown('promoters')" style="cursor:pointer"><div class="kpi-label">Promoters</div><div class="kpi-value" style="color:var(--green)">${pr}</div><div class="kpi-sub">NPS 9–10 · click to view</div></div>
+      <div class="kpi-card kpi-clickable" onclick="Feedback.drilldown('passives')" style="cursor:pointer"><div class="kpi-label">Passives</div><div class="kpi-value" style="color:var(--gold)">${pa}</div><div class="kpi-sub">NPS 7–8 · click to view</div></div>
+      <div class="kpi-card kpi-clickable" onclick="Feedback.drilldown('detractors')" style="cursor:pointer"><div class="kpi-label">Detractors</div><div class="kpi-value" style="color:var(--red)">${de}</div><div class="kpi-sub">NPS 0–6 · click to view</div></div>
+      <div class="kpi-card kpi-clickable" onclick="Feedback.drilldown('testimonials')" style="cursor:pointer"><div class="kpi-label">Testimonials</div><div class="kpi-value">${testimonials}</div><div class="kpi-sub">Captured · click to view</div></div>
+      <div class="kpi-card kpi-clickable" onclick="Feedback.drilldown('referrals')" style="cursor:pointer"><div class="kpi-label">Referral Opps</div><div class="kpi-value" style="color:var(--blue)">${referrals}</div><div class="kpi-sub">Willing to refer · click to view</div></div>
+      <div class="kpi-card kpi-clickable" onclick="Feedback.drilldown('aftersales')" style="cursor:pointer"><div class="kpi-label">After-Sales Opps</div><div class="kpi-value" style="color:var(--gold)">${afterSales}</div><div class="kpi-sub">Upsell interest · click to view</div></div>
+      <div class="kpi-card kpi-clickable" onclick="Feedback.drilldown('complaints')" style="cursor:pointer"><div class="kpi-label">Complaints Raised</div><div class="kpi-value" style="color:${complaintsR?'var(--red)':'inherit'}">${complaintsR}</div><div class="kpi-sub">${complaintsX} resolved · click to view</div></div>
+      <div class="kpi-card kpi-clickable" onclick="Feedback.drilldown('followups')" style="cursor:pointer"><div class="kpi-label">Follow-ups Needed</div><div class="kpi-value" style="color:${followups?'var(--gold)':'inherit'}">${followups}</div><div class="kpi-sub">Open items · click to view</div></div>
+      <div class="kpi-card kpi-clickable" onclick="Feedback.drilldown('repeatbiz')" style="cursor:pointer"><div class="kpi-label">Repeat Business</div><div class="kpi-value" style="color:var(--green)">${repeatBiz}</div><div class="kpi-sub">Future intent · click to view</div></div>
     `;
+
+    const insightsEl=$('fb-insights');
+    if(n>0){
+      insightsEl.style.display='block';
+      const needFollowup=all.filter(f=>f.followupRequired||f.wantsCallback);
+      const futurePurchase=all.filter(f=>f.futureOpportunity);
+      const willingRefer=all.filter(f=>f.referralWilling&&f.referralName);
+      const openComplaints=all.filter(f=>f.complaintsRaised&&!f.complaintsResolved);
+      $('fb-insights-grid').innerHTML=
+        this._insightCard('Follow-up Needed','var(--gold)',needFollowup.map(f=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><strong>${esc(f.name)}</strong>${f.wantsCallback?' &middot; <span style="color:var(--gold)">Callback</span>':''}</div>`).join('')||'<div style="font-size:13px;color:var(--text2)">None pending.</div>')+
+        this._insightCard('Future Purchase','var(--green)',futurePurchase.map(f=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><strong>${esc(f.name)}</strong>${f.futureNotes?`<div style="color:var(--text2);font-size:12px">${esc(f.futureNotes)}</div>`:''}</div>`).join('')||'<div style="font-size:13px;color:var(--text2)">None yet.</div>')+
+        this._insightCard('Referral Pipeline','var(--blue)',willingRefer.map(f=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><strong>${esc(f.referralName)}</strong>${f.referralPhone?` &middot; ${esc(f.referralPhone)}`:''}<div style="color:var(--text2);font-size:12px">via ${esc(f.name)}</div></div>`).join('')||'<div style="font-size:13px;color:var(--text2)">No referrals yet.</div>')+
+        this._insightCard('Open Complaints','var(--red)',openComplaints.map(f=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><strong>${esc(f.name)}</strong>${f.improvement?`<div style="color:var(--text2);font-size:12px">${esc(f.improvement)}</div>`:''}</div>`).join('')||'<div style="font-size:13px;color:var(--green)">No open complaints.</div>');
+    }else{insightsEl.style.display='none';}
+
     const tbody=$('feedback-tbody');
-    if(!all.length){
-      tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div><h4>No feedback yet</h4><p>Log your first achiever feedback.</p><button class="btn btn-gold btn-sm" onclick="Feedback.openAdd()">Log Feedback</button></div></td></tr>`;
+    if(!n){
+      tbody.innerHTML=`<tr><td colspan="11"><div class="empty-state"><div class="empty-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div><h4>No feedback yet</h4><p>Log your first achiever feedback.</p><button class="btn btn-gold btn-sm" onclick="Feedback.openAdd()">Log Feedback</button></div></td></tr>`;
       return;
     }
-    tbody.innerHTML=[...all].reverse().map(f=>`<tr>
-      <td><strong>${esc(f.name)}</strong>${f.socialHandle?`<div style="font-size:11px;color:var(--text2)">${esc(f.socialHandle)}</div>`:''}</td>
-      <td>${f.orderNo?`<span class="badge badge-grey">${esc(f.orderNo)}</span>`:'—'}</td>
-      <td>${esc(f.product)}</td>
-      <td><span class="badge ${npsClass(f.nps)}">${f.nps}/10</span></td>
-      <td>${f.framedSash?'<span class="badge badge-gold">Yes</span>':'<span class="badge badge-grey">No</span>'}</td>
-      <td>${fmt(f.date)}</td>
-      <td><div style="display:flex;gap:6px;justify-content:flex-end">
-        <button class="btn btn-ghost btn-icon btn-sm" onclick="Feedback.openView('${f.id}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
-        <button class="btn btn-danger btn-icon btn-sm" onclick="Feedback.remove('${f.id}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-      </div></td>
-    </tr>`).join('');
+    tbody.innerHTML=[...all].reverse().map(f=>{
+      const nCls=f.nps>=9?'badge-green':f.nps>=7?'badge-gold':'badge-red';
+      const nLbl=f.nps>=9?'Promoter':f.nps>=7?'Passive':'Detractor';
+      const asList=[f.interestedFramed?'Framed':'',f.interestedAnotherSash?'Sash':'',f.interestedCorporate?'Corp':'',f.wantsCallback?'Call':''].filter(Boolean);
+      return`<tr>
+        <td><strong>${esc(f.name)}</strong></td>
+        <td>${f.orderNo?`<span class="badge badge-grey">${esc(f.orderNo)}</span>`:'—'}</td>
+        <td>${esc(f.product)}</td>
+        <td><span class="badge ${f.csat>=9?'badge-green':f.csat>=7?'badge-gold':'badge-red'}">${f.csat}/10</span></td>
+        <td><span class="badge ${nCls}">${nLbl}</span></td>
+        <td>${f.referralWilling?'<span class="badge badge-green">Yes</span>':'<span class="badge badge-grey">No</span>'}</td>
+        <td>${f.testimonialPermission?'<span class="badge badge-gold">Yes</span>':'<span class="badge badge-grey">No</span>'}</td>
+        <td>${asList.length?`<span class="badge badge-gold">${esc(asList.join(', '))}</span>`:'<span class="badge badge-grey">None</span>'}</td>
+        <td>${(f.followupRequired||f.wantsCallback)?'<span class="badge badge-red">Yes</span>':'<span class="badge badge-grey">No</span>'}</td>
+        <td>${fmt(f.date)}</td>
+        <td><div style="display:flex;gap:6px;justify-content:flex-end">
+          <button class="btn btn-ghost btn-icon btn-sm" title="View" onclick="Feedback.openView('${f.id}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
+          <button class="btn btn-danger btn-icon btn-sm" title="Delete" onclick="Feedback.remove('${f.id}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+        </div></td>
+      </tr>`;
+    }).join('');
   },
-  async openAdd(){
-    const qs=await this.getQuestions();
+
+  drilldown(key){
+    const all=Cache.feedback;
+    const cfgs={
+      promoters:{title:'Promoters (NPS 9–10)',filter:f=>f.nps>=9},
+      passives:{title:'Passives (NPS 7–8)',filter:f=>f.nps>=7&&f.nps<9},
+      detractors:{title:'Detractors (NPS 0–6)',filter:f=>f.nps<7},
+      testimonials:{title:'Testimonials Approved',filter:f=>f.testimonialPermission},
+      referrals:{title:'Referral Opportunities',filter:f=>f.referralWilling},
+      aftersales:{title:'After-Sales Opportunities',filter:f=>f.interestedFramed||f.interestedAnotherSash||f.interestedCorporate||f.wantsCallback},
+      complaints:{title:'Complaints Raised',filter:f=>f.complaintsRaised},
+      followups:{title:'Follow-ups Needed',filter:f=>f.followupRequired||f.wantsCallback},
+      repeatbiz:{title:'Repeat Business Intent',filter:f=>f.futureOpportunity},
+    };
+    const cfg=cfgs[key];if(!cfg)return;
+    const records=all.filter(cfg.filter);
+    if(!records.length){Toast.show('No records in this category yet.','info');return;}
+    const renderRow=f=>{
+      switch(key){
+        case 'promoters':case 'passives':
+          return`<tr><td><strong>${esc(f.name)}</strong></td><td>${f.orderNo?`<span class="badge badge-grey">${esc(f.orderNo)}</span>`:'—'}</td><td><span class="badge ${f.nps>=9?'badge-green':'badge-gold'}">${f.nps}/10</span></td><td><span class="badge ${f.csat>=9?'badge-green':f.csat>=7?'badge-gold':'badge-red'}">${f.csat}/10</span></td><td>${fmt(f.date)}</td></tr>`;
+        case 'detractors':
+          return`<tr><td><strong>${esc(f.name)}</strong></td><td>${f.orderNo?`<span class="badge badge-grey">${esc(f.orderNo)}</span>`:'—'}</td><td><span class="badge badge-red">${f.nps}/10</span></td><td style="font-size:12px;color:var(--text2)">${esc(f.improvement||'—')}</td><td>${fmt(f.date)}</td></tr>`;
+        case 'testimonials':
+          return`<tr><td><strong>${esc(f.name)}</strong></td><td>${f.orderNo?`<span class="badge badge-grey">${esc(f.orderNo)}</span>`:'—'}</td><td style="font-style:italic;font-size:13px;color:var(--text2)">${esc(f.testimonialText||'—')}</td><td>${fmt(f.date)}</td></tr>`;
+        case 'referrals':
+          return`<tr><td><strong>${esc(f.name)}</strong></td><td>${f.orderNo?`<span class="badge badge-grey">${esc(f.orderNo)}</span>`:'—'}</td><td>${esc(f.referralName||'—')}</td><td>${esc(f.referralPhone||'—')}</td><td>${fmt(f.date)}</td></tr>`;
+        case 'aftersales':{const items=[f.interestedFramed?'Framed':'',f.interestedAnotherSash?'Another Sash':'',f.interestedCorporate?'Corporate':'',f.wantsCallback?'Callback':''].filter(Boolean);return`<tr><td><strong>${esc(f.name)}</strong></td><td>${f.orderNo?`<span class="badge badge-grey">${esc(f.orderNo)}</span>`:'—'}</td><td>${items.map(i=>`<span class="badge badge-gold" style="margin-right:4px">${esc(i)}</span>`).join('')}</td><td>${fmt(f.date)}</td></tr>`;}
+        case 'complaints':
+          return`<tr><td><strong>${esc(f.name)}</strong></td><td>${f.orderNo?`<span class="badge badge-grey">${esc(f.orderNo)}</span>`:'—'}</td><td style="font-size:12px;color:var(--text2)">${esc(f.improvement||'—')}</td><td>${f.complaintsResolved?'<span class="badge badge-green">Resolved</span>':'<span class="badge badge-red">Open</span>'}</td><td>${fmt(f.date)}</td></tr>`;
+        case 'followups':{const t=[f.followupRequired?'Action needed':'',f.wantsCallback?'Callback':''].filter(Boolean);return`<tr><td><strong>${esc(f.name)}</strong></td><td>${f.orderNo?`<span class="badge badge-grey">${esc(f.orderNo)}</span>`:'—'}</td><td>${t.map(x=>`<span class="badge badge-gold" style="margin-right:4px">${esc(x)}</span>`).join('')}</td><td>${fmt(f.date)}</td></tr>`;}
+        case 'repeatbiz':
+          return`<tr><td><strong>${esc(f.name)}</strong></td><td>${f.orderNo?`<span class="badge badge-grey">${esc(f.orderNo)}</span>`:'—'}</td><td style="font-size:13px;color:var(--text2)">${esc(f.futureNotes||'Future purchase interest')}</td><td>${fmt(f.date)}</td></tr>`;
+        default:return'';
+      }
+    };
+    const headers={
+      promoters:'<tr><th>Achiever</th><th>Order #</th><th>NPS</th><th>CSAT</th><th>Date</th></tr>',
+      passives:'<tr><th>Achiever</th><th>Order #</th><th>NPS</th><th>CSAT</th><th>Date</th></tr>',
+      detractors:'<tr><th>Achiever</th><th>Order #</th><th>NPS</th><th>Issue</th><th>Date</th></tr>',
+      testimonials:'<tr><th>Achiever</th><th>Order #</th><th>Testimonial</th><th>Date</th></tr>',
+      referrals:'<tr><th>Achiever</th><th>Order #</th><th>Referral Name</th><th>Referral Phone</th><th>Date</th></tr>',
+      aftersales:'<tr><th>Achiever</th><th>Order #</th><th>Interests</th><th>Date</th></tr>',
+      complaints:'<tr><th>Achiever</th><th>Order #</th><th>Complaint Detail</th><th>Status</th><th>Date</th></tr>',
+      followups:'<tr><th>Achiever</th><th>Order #</th><th>Type</th><th>Date</th></tr>',
+      repeatbiz:'<tr><th>Achiever</th><th>Order #</th><th>Details</th><th>Date</th></tr>',
+    };
+    Modal.open(cfg.title+' ('+records.length+')',`<div class="tbl-wrap"><table><thead>${headers[key]||''}</thead><tbody>${records.map(renderRow).join('')}</tbody></table></div>`,`<button class="btn btn-ghost" onclick="Modal.close()">Close</button>`);
+  },
+
+  _insightCard(title,accentColor,bodyHTML){
+    return`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;border-left:3px solid ${accentColor}"><div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:10px">${title}</div><div style="max-height:160px;overflow-y:auto">${bodyHTML}</div></div>`;
+  },
+
+  openAdd(){
     const po=PRODUCTS.map(p=>`<option>${esc(p)}</option>`).join('');
-    const qFields=qs.map((q,i)=>`<div class="form-row"><label>Q${i+1}: ${esc(q)}</label><textarea id="fb-q-${i}" placeholder="Their answer…" style="min-height:60px"></textarea></div>`).join('');
     Modal.open('Log Achiever Feedback',`
       <div class="form-section-label">Achiever Details</div>
       <div class="form-grid">
         <div class="form-row"><label>Order Number *</label><input id="fb-order" placeholder="SA-001"/></div>
         <div class="form-row"><label>Achiever Name *</label><input id="fb-name" placeholder="Full name"/></div>
       </div>
-      <div class="form-grid">
-        <div class="form-row"><label>Product *</label><select id="fb-product"><option value="">— select —</option>${po}</select></div>
-        <div class="form-row"><label>Social Media Handle</label><input id="fb-social" placeholder="@handle"/></div>
+      <div class="form-row"><label>Product *</label><select id="fb-product"><option value="">— select —</option>${po}</select></div>
+      <div class="form-section-label" style="margin-top:20px">§1 — Overall Satisfaction (CSAT)</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">"On a scale of 1–10, how satisfied were you with your overall experience?"</div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px">
+        <div class="fb-score-display" id="csat-display">8</div>
+        <div style="flex:1"><input class="nps-slider" type="range" id="fb-csat" min="1" max="10" value="8" oninput="var d=$('csat-display');d.textContent=this.value;d.style.color=+this.value>=9?'var(--green)':+this.value>=7?'var(--gold)':'var(--red)'"/>
+        <div class="nps-labels"><span>1 — Very Dissatisfied</span><span>10 — Very Satisfied</span></div></div>
       </div>
-      <div class="form-row"><label>Birthday</label><input id="fb-bday" type="date"/></div>
-      <div class="form-section-label">Satisfaction</div>
-      <div class="nps-value-display" id="nps-display">8</div>
-      <div class="nps-slider-wrap">
-        <input class="nps-slider" type="range" id="fb-nps" min="0" max="10" value="8" oninput="$('nps-display').textContent=this.value"/>
-        <div class="nps-labels"><span>0 — Detractor</span><span>10 — Promoter</span></div>
+      <div class="form-section-label" style="margin-top:20px">§2 — Emotional Experience</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">"How did you feel when you first saw your sash?"</div>
+      <div class="form-row"><textarea id="fb-emotion" placeholder="Their exact words…" style="min-height:60px"></textarea></div>
+      <div class="form-section-label" style="margin-top:20px">§3 — Product Quality</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">"Were you satisfied with the quality of your sash?"</div>
+      <div class="fb-pill-group">
+        <label class="fb-pill"><input type="radio" name="fb-quality" value="Very satisfied"/><span>Very satisfied</span></label>
+        <label class="fb-pill"><input type="radio" name="fb-quality" value="Satisfied"/><span>Satisfied</span></label>
+        <label class="fb-pill"><input type="radio" name="fb-quality" value="Neutral"/><span>Neutral</span></label>
+        <label class="fb-pill"><input type="radio" name="fb-quality" value="Dissatisfied"/><span>Dissatisfied</span></label>
+        <label class="fb-pill"><input type="radio" name="fb-quality" value="Very dissatisfied"/><span>Very dissatisfied</span></label>
       </div>
-      <div class="form-section-label">Questions</div>
-      ${qFields}
-      <div class="form-section-label">Referral</div>
-      <div class="form-grid">
-        <div class="form-row"><label>Referral Name</label><input id="fb-ref-name" placeholder="Who did they refer?"/></div>
-        <div class="form-row"><label>Referral Phone</label><input id="fb-ref-phone" placeholder="Contact number"/></div>
+      <div class="form-section-label" style="margin-top:20px">§4 — Service Experience</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">"How would you rate our communication and customer service?"</div>
+      <div class="fb-pill-group">
+        <label class="fb-pill"><input type="radio" name="fb-service" value="Excellent"/><span>Excellent</span></label>
+        <label class="fb-pill"><input type="radio" name="fb-service" value="Good"/><span>Good</span></label>
+        <label class="fb-pill"><input type="radio" name="fb-service" value="Average"/><span>Average</span></label>
+        <label class="fb-pill"><input type="radio" name="fb-service" value="Poor"/><span>Poor</span></label>
       </div>
-      <div class="form-section-label">After-Sales</div>
-      <label class="form-check" style="margin-bottom:12px">
-        <input type="checkbox" id="fb-framed"/>
-        <span>Achiever is interested in a <strong>Framed Sash</strong></span>
-      </label>
-      <div class="form-row"><label>Framed Sash Note</label><input id="fb-framed-note" placeholder="e.g. Wants 8×10 gold frame"/></div>
-      <div class="form-section-label">Other</div>
-      <label class="form-check">
-        <input type="checkbox" id="fb-testimonial"/>
-        <span>Mark as testimonial (positive & shareable)</span>
-      </label>
+      <div class="form-section-label" style="margin-top:20px">§5 — Delivery Experience</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">"Were you satisfied with the delivery or collection process?"</div>
+      <div class="fb-pill-group">
+        <label class="fb-pill"><input type="radio" name="fb-delivery" value="yes" onchange="$('fb-delivery-issue-wrap').style.display='none'"/><span>Yes</span></label>
+        <label class="fb-pill"><input type="radio" name="fb-delivery" value="no" onchange="$('fb-delivery-issue-wrap').style.display='block'"/><span>No</span></label>
+      </div>
+      <div id="fb-delivery-issue-wrap" style="display:none;margin-top:10px"><div class="form-row"><label>What went wrong?</label><textarea id="fb-delivery-issue" placeholder="Describe the issue…" style="min-height:60px"></textarea></div></div>
+      <div class="form-section-label" style="margin-top:20px">§6 — Recommendation (NPS)</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">"How likely are you to recommend Sash Afrique to your friends or colleagues?"</div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px">
+        <div class="fb-score-display" id="nps-display-fb">8</div>
+        <div style="flex:1"><input class="nps-slider" type="range" id="fb-nps" min="0" max="10" value="8" oninput="var v=+this.value,d=$('nps-display-fb'),cat=$('nps-cat-fb');d.textContent=v;d.style.color=v>=9?'var(--green)':v>=7?'var(--gold)':'var(--red)';cat.textContent=v>=9?'Promoter':v>=7?'Passive':'Detractor'"/>
+        <div class="nps-labels"><span>0 — Not at all</span><span>10 — Absolutely</span></div></div>
+        <span class="badge badge-gold" id="nps-cat-fb" style="font-size:12px;white-space:nowrap">Passive</span>
+      </div>
+      <div class="form-section-label" style="margin-top:20px">§7 — Improvement Opportunity</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">"If there was one thing we could improve, what would it be?"</div>
+      <div class="form-row"><textarea id="fb-improvement" placeholder="One thing to improve…" style="min-height:60px"></textarea></div>
+      <div class="form-section-label" style="margin-top:20px">§8 — Referral Opportunity</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">"Would you be willing to refer someone to Sash Afrique?"</div>
+      <div class="fb-pill-group">
+        <label class="fb-pill"><input type="radio" name="fb-referral" value="yes" onchange="$('fb-referral-details').style.display='block'"/><span>Yes</span></label>
+        <label class="fb-pill"><input type="radio" name="fb-referral" value="no" onchange="$('fb-referral-details').style.display='none'"/><span>No</span></label>
+      </div>
+      <div id="fb-referral-details" style="display:none;margin-top:10px"><div class="form-grid"><div class="form-row"><label>Referral Name</label><input id="fb-ref-name" placeholder="Full name"/></div><div class="form-row"><label>Referral Phone</label><input id="fb-ref-phone" placeholder="024 XXX XXXX"/></div></div></div>
+      <div class="form-section-label" style="margin-top:20px">§9 — Future Business</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">"Any upcoming graduations, promotions, weddings or celebrations?"</div>
+      <div class="fb-pill-group">
+        <label class="fb-pill"><input type="radio" name="fb-future" value="yes" onchange="$('fb-future-notes-wrap').style.display='block'"/><span>Yes</span></label>
+        <label class="fb-pill"><input type="radio" name="fb-future" value="no" onchange="$('fb-future-notes-wrap').style.display='none'"/><span>No</span></label>
+      </div>
+      <div id="fb-future-notes-wrap" style="display:none;margin-top:10px"><div class="form-row"><label>Details</label><input id="fb-future-notes" placeholder="e.g. Daughter graduating KNUST in June"/></div></div>
+      <div class="form-section-label" style="margin-top:20px">§10 — Testimonial Permission</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">"Would you allow us to use your feedback as a testimonial?"</div>
+      <div class="fb-pill-group">
+        <label class="fb-pill"><input type="radio" name="fb-testimonial" value="yes" onchange="$('fb-testimonial-text-wrap').style.display='block'"/><span>Yes</span></label>
+        <label class="fb-pill"><input type="radio" name="fb-testimonial" value="no" onchange="$('fb-testimonial-text-wrap').style.display='none'"/><span>No</span></label>
+      </div>
+      <div id="fb-testimonial-text-wrap" style="display:none;margin-top:10px"><div class="form-row"><label>Testimonial Quote</label><textarea id="fb-testimonial-text" placeholder="Their words in full…" style="min-height:70px"></textarea></div></div>
+      <div class="form-section-label" style="margin-top:20px">§11 — After-Sales Opportunities</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <label class="form-check"><input type="checkbox" id="fb-framed"/><span>Interested in a <strong>Framed Sash</strong></span></label>
+        <label class="form-check"><input type="checkbox" id="fb-another-sash"/><span>Interested in another <strong>Kente Sash</strong></span></label>
+        <label class="form-check"><input type="checkbox" id="fb-corporate"/><span>Interested in <strong>Corporate Gifts</strong></span></label>
+        <label class="form-check"><input type="checkbox" id="fb-callback"/><span>Wants a <strong>Follow-up Callback</strong></span></label>
+      </div>
+      <div class="form-section-label" style="margin-top:20px">Flags</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <label class="form-check"><input type="checkbox" id="fb-complaint-raised"/><span>A complaint was raised during this call</span></label>
+        <label class="form-check"><input type="checkbox" id="fb-complaint-resolved"/><span>Complaint was resolved before call ended</span></label>
+        <label class="form-check"><input type="checkbox" id="fb-followup-required"/><span>Follow-up action required from our team</span></label>
+      </div>
     `,`<button class="btn btn-ghost" onclick="Modal.close()">Cancel</button><button class="btn btn-gold" onclick="Feedback.save()">Save Feedback</button>`);
   },
-  async save(){
+
+  save(){
     const name=$('fb-name').value.trim(),order=$('fb-order').value.trim(),product=$('fb-product').value;
     if(!name||!order||!product){Toast.show('Order number, name and product are required.','error');return;}
-    const qs=await this.getQuestions();
-    const answers=qs.map((_,i)=>($(`fb-q-${i}`)?.value.trim()||''));
+    const rv=n=>document.querySelector('input[name="'+n+'"]:checked')?.value||'';
     const f={
       id:uid(),name,orderNo:order,product,
-      socialHandle:$('fb-social').value.trim(),
-      birthday:$('fb-bday').value,
-      nps:+$('fb-nps').value,
-      answers,
-      testimonial:$('fb-testimonial').checked,
-      referralName:$('fb-ref-name').value.trim(),
-      referralPhone:$('fb-ref-phone').value.trim(),
-      framedSash:$('fb-framed').checked,
-      framedSashNote:$('fb-framed-note').value.trim(),
+      csat:+$('fb-csat').value,nps:+$('fb-nps').value,
+      emotionalResponse:$('fb-emotion').value.trim(),
+      productQuality:rv('fb-quality'),serviceRating:rv('fb-service'),
+      deliveryOk:rv('fb-delivery')==='yes',
+      deliveryIssue:($('fb-delivery-issue')?.value||'').trim(),
+      improvement:$('fb-improvement').value.trim(),
+      referralWilling:rv('fb-referral')==='yes',
+      referralName:($('fb-ref-name')?.value||'').trim(),
+      referralPhone:($('fb-ref-phone')?.value||'').trim(),
+      futureOpportunity:rv('fb-future')==='yes',
+      futureNotes:($('fb-future-notes')?.value||'').trim(),
+      testimonialPermission:rv('fb-testimonial')==='yes',
+      testimonialText:($('fb-testimonial-text')?.value||'').trim(),
+      interestedFramed:$('fb-framed').checked,
+      interestedAnotherSash:$('fb-another-sash').checked,
+      interestedCorporate:$('fb-corporate').checked,
+      wantsCallback:$('fb-callback').checked,
+      complaintsRaised:$('fb-complaint-raised').checked,
+      complaintsResolved:$('fb-complaint-resolved').checked,
+      followupRequired:$('fb-followup-required').checked,
       date:today()
     };
-    const ok=await GS.append('Feedback',feedbackToRow(f));
-    if(!ok) return;
-    Cache.feedback.push(f);
-    Modal.close();Toast.show('Feedback logged.');this._render();
+    GS.append('Feedback',feedbackToRow(f)).then(ok=>{
+      if(!ok)return;Cache.feedback.push(f);Modal.close();Toast.show('Feedback logged.');Feedback._render();
+    });
   },
+
   openView(id){
     const f=Cache.feedback.find(r=>r.id===id);if(!f)return;
-    const qs=Cache.fbQuestions||DEFAULT_QUESTIONS;
-    const answers=(f.answers||[]);
-    const qaHTML=qs.map((q,i)=>`
-      <div style="margin-bottom:14px">
-        <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:4px">Q${i+1}: ${esc(q)}</div>
-        <div style="font-size:13px;color:var(--text)">${esc(answers[i]||'—')}</div>
-      </div>`).join('');
-    Modal.open(f.name,`
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
-        <span class="badge ${npsClass(f.nps)}" style="font-size:14px;padding:5px 14px">${f.nps}/10 — ${npsLabel(f.nps)}</span>
-        ${f.testimonial?'<span class="badge badge-green">Testimonial</span>':''}
-        ${f.framedSash?'<span class="badge badge-gold">Framed Sash</span>':''}
+    const nCls=f.nps>=9?'badge-green':f.nps>=7?'badge-gold':'badge-red';
+    const nLbl=f.nps>=9?'Promoter':f.nps>=7?'Passive':'Detractor';
+    const asList=[f.interestedFramed?'Framed Sash':'',f.interestedAnotherSash?'Another Sash':'',f.interestedCorporate?'Corporate Gifts':'',f.wantsCallback?'Callback Requested':''].filter(Boolean);
+    Modal.open(f.name+' — Feedback',`
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+        <span class="badge ${f.csat>=9?'badge-green':f.csat>=7?'badge-gold':'badge-red'}">CSAT ${f.csat}/10</span>
+        <span class="badge ${nCls}">NPS ${f.nps}/10 — ${nLbl}</span>
+        ${f.testimonialPermission?'<span class="badge badge-gold">Testimonial ✓</span>':''}
+        ${f.referralWilling?'<span class="badge badge-green">Referral ✓</span>':''}
+        ${(f.followupRequired||f.wantsCallback)?'<span class="badge badge-red">Follow-up Needed</span>':''}
       </div>
-      <div class="form-grid" style="margin-bottom:16px">
-        <div><div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:4px">Order</div>${esc(f.orderNo||'—')}</div>
-        <div><div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:4px">Product</div>${esc(f.product)}</div>
-        ${f.socialHandle?`<div><div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:4px">Social</div>${esc(f.socialHandle)}</div>`:''}
-        ${f.birthday?`<div><div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:4px">Birthday</div>${fmt(f.birthday)}</div>`:''}
-        ${f.referralName?`<div><div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:4px">Referral</div>${esc(f.referralName)} ${f.referralPhone?'· '+esc(f.referralPhone):''}</div>`:''}
-        ${f.framedSashNote?`<div><div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:4px">Frame Note</div>${esc(f.framedSashNote)}</div>`:''}
+      <div class="form-grid" style="margin-bottom:18px">
+        <div><div class="fb-view-label">Order</div>${esc(f.orderNo||'—')}</div>
+        <div><div class="fb-view-label">Product</div>${esc(f.product)}</div>
+        <div><div class="fb-view-label">Date</div>${fmt(f.date)}</div>
+        <div><div class="fb-view-label">Delivery OK?</div>${f.deliveryOk?'Yes':'No'}</div>
       </div>
-      <div class="form-section-label" style="margin-top:0">Feedback Answers</div>${qaHTML}
+      ${f.emotionalResponse?`<div class="fb-quote-block">&ldquo;${esc(f.emotionalResponse)}&rdquo;</div>`:''}
+      ${(f.productQuality||f.serviceRating)?`<div class="form-section-label">Ratings</div><div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px">${f.productQuality?`<div><div class="fb-view-label">Product Quality</div><span class="badge badge-grey">${esc(f.productQuality)}</span></div>`:''} ${f.serviceRating?`<div><div class="fb-view-label">Service</div><span class="badge badge-grey">${esc(f.serviceRating)}</span></div>`:''} ${f.deliveryIssue?`<div style="flex:1"><div class="fb-view-label">Delivery Issue</div><div style="font-size:13px;color:var(--red)">${esc(f.deliveryIssue)}</div></div>`:''}</div>`:''}
+      ${f.improvement?`<div class="form-section-label">Improvement</div><div style="font-size:13px;margin-bottom:18px;padding:12px;background:var(--surface2);border-radius:var(--radius-sm)">${esc(f.improvement)}</div>`:''}
+      ${(f.referralWilling&&f.referralName)?`<div class="form-section-label">Referral</div><div style="font-size:13px;margin-bottom:18px"><strong>${esc(f.referralName)}</strong>${f.referralPhone?' · '+esc(f.referralPhone):''}</div>`:''}
+      ${f.futureOpportunity?`<div class="form-section-label">Future Opportunity</div><div style="font-size:13px;margin-bottom:18px">${f.futureNotes?esc(f.futureNotes):'Interested in future purchase'}</div>`:''}
+      ${(f.testimonialPermission&&f.testimonialText)?`<div class="form-section-label">Testimonial</div><div class="fb-quote-block">&ldquo;${esc(f.testimonialText)}&rdquo;</div>`:''}
+      ${asList.length?`<div class="form-section-label">After-Sales</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px">${asList.map(i=>`<span class="badge badge-gold">${esc(i)}</span>`).join('')}</div>`:''}
+      <div class="form-section-label">Flags</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${f.complaintsRaised?'<span class="badge badge-red">Complaint Raised</span>':''}
+        ${f.complaintsResolved?'<span class="badge badge-green">Complaint Resolved</span>':''}
+        ${f.followupRequired?'<span class="badge badge-gold">Follow-up Required</span>':''}
+        ${(!f.complaintsRaised&&!f.followupRequired)?'<span style="font-size:13px;color:var(--text2)">No flags.</span>':''}
+      </div>
     `,`<button class="btn btn-ghost" onclick="Modal.close()">Close</button>`);
   },
+
   async remove(id){
-    if(!confirm('Delete this feedback?')) return;
+    if(!confirm('Delete this feedback record?'))return;
     const ok=await GS.delete('Feedback',id);
-    if(!ok) return;
+    if(!ok)return;
     Cache.feedback=Cache.feedback.filter(r=>r.id!==id);
     Toast.show('Feedback deleted.','info');this._render();
   },
-  async openEditQuestions(){
-    let qs=[...await this.getQuestions()];
-    const renderList=()=>{
-      const list=$('fq-list');if(!list)return;
-      list.innerHTML=qs.map((q,i)=>`
-        <div class="fq-item"><span>${esc(q)}</span><span class="fq-remove" onclick="FQS.remove(${i})">×</span></div>`).join('');
-    };
-    window.FQS={
-      remove(i){qs.splice(i,1);renderList();},
-      add(){const v=$('fq-input').value.trim();if(!v)return;qs.push(v);$('fq-input').value='';renderList();},
-      async done(){await Feedback.saveQuestions(qs);Modal.close();Toast.show('Questions saved.');}
-    };
-    Modal.open('Edit Feedback Questions',`
-      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">These questions appear in every feedback form.</p>
-      <div class="fq-list" id="fq-list"></div>
-      <div class="fq-add"><input id="fq-input" placeholder="Type a new question…" onkeydown="if(event.key==='Enter')FQS.add()"/><button class="btn btn-gold btn-sm" onclick="FQS.add()">Add</button></div>
-    `,`<button class="btn btn-gold" onclick="FQS.done()">Save Questions</button>`);
-    renderList();
+};
+
+/* ══════════════════════════════════════════════════
+   CALL LOG
+══════════════════════════════════════════════════ */
+const CallLog={
+  async render(){
+    const raw=await GS.get('CallLog');
+    Cache.calllog=raw.map(rowToCall);
+    this._render();
+  },
+  _render(){
+    const all=Cache.calllog,n=all.length;
+    const answered=all.filter(c=>c.outcome==='Picked Up').length;
+    const noAnswer=all.filter(c=>c.outcome==='No Answer').length;
+    const cbReq=all.filter(c=>c.outcome==='Call Back Later').length;
+    const rate=n?Math.round(answered/n*100):0;
+    $('cl-kpis').innerHTML=`
+      <div class="kpi-card kpi-gold kpi-clickable" onclick="CallLog.showDrilldown('All Calls',all)" style="cursor:pointer"><div class="kpi-label">Total Calls Made</div><div class="kpi-value">${n}</div><div class="kpi-sub">Click to view all</div></div>
+      <div class="kpi-card kpi-clickable" onclick="CallLog.showDrilldown('Picked Up',all.filter(c=>c.outcome==='Picked Up'))" style="cursor:pointer"><div class="kpi-label">Calls Picked Up</div><div class="kpi-value" style="color:var(--green)">${answered}</div><div class="kpi-sub">Connected · click to view</div></div>
+      <div class="kpi-card kpi-clickable" onclick="CallLog.showDrilldown('No Answer',all.filter(c=>c.outcome==='No Answer'))" style="cursor:pointer"><div class="kpi-label">No Answer</div><div class="kpi-value" style="color:${noAnswer?'var(--red)':'inherit'}">${noAnswer}</div><div class="kpi-sub">Not picked up · click to view</div></div>
+      <div class="kpi-card kpi-clickable" onclick="CallLog.showDrilldown('Call Back Later',all.filter(c=>c.outcome==='Call Back Later'))" style="cursor:pointer"><div class="kpi-label">Callback Requested</div><div class="kpi-value" style="color:var(--gold)">${cbReq}</div><div class="kpi-sub">Needs follow-up · click to view</div></div>
+      <div class="kpi-card"><div class="kpi-label">Pick-up Rate</div><div class="kpi-value" style="color:${rate>=70?'var(--green)':rate>=40?'var(--gold)':'var(--red)'}">${n?rate+'%':'—'}</div><div class="kpi-sub">Answered / Total</div></div>
+    `;
+    const tbody=$('calllog-tbody');
+    if(!n){tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><div class="empty-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg></div><h4>No calls logged yet</h4><p>Log every call attempt — answered or not.</p><button class="btn btn-gold btn-sm" onclick="CallLog.openAdd()">Log Call</button></div></td></tr>`;return;}
+    tbody.innerHTML=[...all].reverse().map(c=>{
+      const oCls=c.outcome==='Picked Up'?'badge-green':c.outcome==='No Answer'?'badge-red':'badge-gold';
+      return`<tr>
+        <td><strong>${esc(c.name)}</strong></td>
+        <td>${c.orderNo?`<span class="badge badge-grey">${esc(c.orderNo)}</span>`:'—'}</td>
+        <td>${fmt(c.date)}</td><td>${esc(c.time||'—')}</td>
+        <td><span class="badge ${oCls}">${esc(c.outcome)}</span></td>
+        <td>${esc(c.staff||'—')}</td>
+        <td style="color:var(--text2);font-size:13px">${esc(c.notes||'—')}</td>
+        <td><button class="btn btn-danger btn-icon btn-sm" onclick="CallLog.remove('${c.id}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>
+      </tr>`;
+    }).join('');
+  },
+  showDrilldown(title,records){
+    if(!records.length){Toast.show('No records in this category yet.','info');return;}
+    const rows=records.map(c=>{
+      const oCls=c.outcome==='Picked Up'?'badge-green':c.outcome==='No Answer'?'badge-red':'badge-gold';
+      return`<tr><td><strong>${esc(c.name)}</strong></td><td>${c.orderNo?`<span class="badge badge-grey">${esc(c.orderNo)}</span>`:'—'}</td><td>${fmt(c.date)} ${esc(c.time||'')}</td><td><span class="badge ${oCls}">${esc(c.outcome)}</span></td><td>${esc(c.staff||'—')}</td><td style="color:var(--text2);font-size:13px">${esc(c.notes||'—')}</td></tr>`;
+    }).join('');
+    Modal.open(title+' ('+records.length+')',`<div class="tbl-wrap"><table><thead><tr><th>Achiever</th><th>Order #</th><th>Date / Time</th><th>Outcome</th><th>Staff</th><th>Notes</th></tr></thead><tbody>${rows}</tbody></table></div>`,`<button class="btn btn-ghost" onclick="Modal.close()">Close</button>`);
+  },
+  openAdd(){
+    const user=Auth.current();
+    const now=new Date();
+    const timeStr=pad2(now.getHours())+':'+pad2(now.getMinutes());
+    Modal.open('Log Call Attempt',`
+      <div class="form-grid">
+        <div class="form-row"><label>Achiever Name *</label><input id="cl-name" placeholder="Full name"/></div>
+        <div class="form-row"><label>Order Number</label><input id="cl-order" placeholder="SA-001"/></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label>Date</label><input id="cl-date" type="date" value="${today()}"/></div>
+        <div class="form-row"><label>Time</label><input id="cl-time" type="time" value="${timeStr}"/></div>
+      </div>
+      <div class="form-row"><label>Call Outcome *</label></div>
+      <div class="fb-pill-group" style="margin-bottom:16px">
+        <label class="fb-pill"><input type="radio" name="cl-outcome" value="Picked Up"/><span>&#10003; Picked Up</span></label>
+        <label class="fb-pill"><input type="radio" name="cl-outcome" value="No Answer"/><span>&#10007; No Answer</span></label>
+        <label class="fb-pill"><input type="radio" name="cl-outcome" value="Call Back Later"/><span>&#8617; Call Back Later</span></label>
+      </div>
+      <div class="form-row"><label>Staff</label><input id="cl-staff" value="${esc(user?.name||'')}" placeholder="Who made the call?"/></div>
+      <div class="form-row"><label>Notes</label><input id="cl-notes" placeholder="e.g. Phone off, will retry tomorrow"/></div>
+    `,`<button class="btn btn-ghost" onclick="Modal.close()">Cancel</button><button class="btn btn-gold" onclick="CallLog.save()">Save Call</button>`);
+  },
+  save(){
+    const name=$('cl-name').value.trim();
+    const outcome=document.querySelector('input[name="cl-outcome"]:checked')?.value||'';
+    if(!name||!outcome){Toast.show('Name and outcome are required.','error');return;}
+    const c={id:uid(),name,orderNo:$('cl-order').value.trim(),date:$('cl-date').value,time:$('cl-time').value,outcome,staff:$('cl-staff').value.trim(),notes:$('cl-notes').value.trim()};
+    GS.append('CallLog',callToRow(c)).then(ok=>{if(!ok)return;Cache.calllog.push(c);Modal.close();Toast.show('Call logged.');CallLog._render();});
+  },
+  async remove(id){
+    if(!confirm('Delete this call record?'))return;
+    const ok=await GS.delete('CallLog',id);
+    if(!ok)return;
+    Cache.calllog=Cache.calllog.filter(r=>r.id!==id);
+    Toast.show('Call deleted.','info');this._render();
   },
 };
 
