@@ -124,6 +124,12 @@ img{display:block;max-width:100%}
 
 /* KPI */
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px;}
+.perf-track{width:100%;height:10px;border-radius:5px;background:var(--surface3);overflow:hidden;}
+.perf-fill{height:100%;border-radius:5px;transition:width .5s ease;min-width:2px;}
+.perf-alert{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.3);font-size:13px;color:var(--text);}
+.perf-alert svg{flex-shrink:0;color:var(--red);margin-top:1px;}
+.perf-row-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;color:var(--text2);}
+.perf-row-label strong{color:var(--text);font-weight:600;}
 .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:border-color var(--trans);}
 .kpi-card:hover{border-color:rgba(250,178,2,.25);}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:.4;transition:opacity var(--trans);}
@@ -363,6 +369,7 @@ select.filter-sel:focus{border-color:var(--gold);}
       <div class="view active" id="view-dashboard">
         <div id="officer-clock-widget"></div>
         <div class="kpi-grid" id="dash-kpis"></div>
+        <div id="perf-section" style="margin-bottom:20px"></div>
         <div class="quick-actions" id="dash-quickactions"></div>
         <div class="dash-charts" id="dash-charts-wrap">
           <div class="card">
@@ -810,6 +817,142 @@ function rowToAtt(r){
 ══════════════════════════════════════════════════ */
 let pipelineChart=null,npsChart=null,clockWidgetTick=null;
 
+/* ══════════════════════════════════════════════════
+   PERFORMANCE TRACKING
+   Default monthly target: >=100 leads sourced, <=50 converted (Won).
+   Admin can override these from the dashboard; stored via GS.getConfig/
+   setConfig so both Admin and Officer see the same numbers.
+   Feedback logging: expected at least once per month by the 10th.
+   NOTE: leads aren't currently tagged per-officer in the sheet, so this
+   reflects overall team lead activity for the month (accurate while there's
+   one Officer; if more staff are added later, a "created by" column would
+   be needed to split totals per person).
+══════════════════════════════════════════════════ */
+const DEFAULT_LEAD_TARGET=100,DEFAULT_CONVERT_CAP=50,FEEDBACK_DEADLINE_DAY=10;
+const Performance={
+  targets:{leadTarget:DEFAULT_LEAD_TARGET,convertCap:DEFAULT_CONVERT_CAP},
+  async loadTargets(){
+    try{
+      const cfg=await GS.getConfig();
+      if(!cfg) return;
+      const parsed=typeof cfg==='string'?JSON.parse(cfg):cfg;
+      if(parsed&&+parsed.leadTarget>0) this.targets.leadTarget=+parsed.leadTarget;
+      if(parsed&&+parsed.convertCap>=0) this.targets.convertCap=+parsed.convertCap;
+    }catch(e){/* keep last known / default targets */}
+  },
+  async saveTargets(){
+    const ltEl=$('perf-target-leads'),ccEl=$('perf-target-conv');
+    const lt=+ltEl.value,cc=+ccEl.value;
+    if(!lt||lt<=0||cc<0||isNaN(cc)){Toast.show('Enter valid target numbers.','error');return;}
+    this.targets={leadTarget:lt,convertCap:cc};
+    await GS.setConfig(JSON.stringify(this.targets));
+    Toast.show('Targets updated.');
+    this.render(true);
+  },
+  monthKey(d){return (d||today()).slice(0,7);},
+  monthLabel(mk){const[y,m]=mk.split('-').map(Number);return new Date(y,m-1,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});},
+  computeMonth(mk){
+    const inMonth=Cache.leads.filter(l=>l.created&&l.created.startsWith(mk));
+    const won=inMonth.filter(l=>l.stage==='Won');
+    return{month:mk,leads:inMonth.length,won:won.length};
+  },
+  feedbackStatus(mk){
+    const logged=Cache.feedback.some(f=>f.date&&f.date.startsWith(mk));
+    const now=new Date();
+    const isCurrent=mk===this.monthKey();
+    const overdue=isCurrent&&!logged&&now.getDate()>FEEDBACK_DEADLINE_DAY;
+    return{logged,overdue};
+  },
+  // Pace-adjusted rating so early-in-the-month numbers aren't unfairly flagged "Low".
+  rating(m){
+    const now=new Date();
+    const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+    const dayOfMonth=now.getDate();
+    const expectedLeads=Math.ceil(this.targets.leadTarget*dayOfMonth/daysInMonth);
+    const leadsOnPace=m.leads>=expectedLeads;
+    const withinCap=this.targets.convertCap<=0?true:m.won<=this.targets.convertCap;
+    return(leadsOnPace&&withinCap)?'High':'Low';
+  },
+  bar(label,value,target,mode){
+    // mode 'min' = target is a floor (green once reached); 'max' = target is a cap (red once exceeded)
+    const pct=Math.min(100,Math.round(value/Math.max(target,1)*100));
+    let color;
+    if(mode==='min') color=value>=target?'var(--green)':'var(--gold)';
+    else color=value>target?'var(--red)':value>=target*0.8?'var(--gold)':'var(--green)';
+    const targetLbl=mode==='min'?`/ ${target} target`:`/ ${target} cap`;
+    return`<div>
+      <div class="perf-row-label"><span>${esc(label)}</span><span><strong>${value}</strong> ${targetLbl}</span></div>
+      <div class="perf-track"><div class="perf-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  },
+  alertHTML(){
+    return`<div class="perf-alert"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg><div>No feedback logged yet this month — please log at least one Achiever Feedback entry. This was due by the 10th.</div></div>`;
+  },
+  targetsFormHTML(){
+    return`<div style="border-top:1px solid var(--border);padding-top:14px;margin-top:2px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:10px">Monthly Targets</div>
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <div class="form-row" style="flex:1;min-width:130px"><label>Lead Target (min)</label><input type="number" min="1" id="perf-target-leads" value="${this.targets.leadTarget}"/></div>
+        <div class="form-row" style="flex:1;min-width:130px"><label>Conversion Cap (max)</label><input type="number" min="0" id="perf-target-conv" value="${this.targets.convertCap}"/></div>
+        <button class="btn btn-gold btn-sm" onclick="Performance.saveTargets()" style="margin-bottom:2px">Save Targets</button>
+      </div>
+    </div>`;
+  },
+  render(isAdmin){
+    const el=$('perf-section');if(!el)return;
+    const mk=this.monthKey();
+    const m=this.computeMonth(mk);
+    const fbs=this.feedbackStatus(mk);
+    const staffName=Auth.current()?.role==='Officer'?Auth.current().name:'Esther Minta';
+
+    let html;
+    if(isAdmin){
+      html=`<div class="card">
+        <div class="card-header"><h3>${esc(staffName)} — Monthly Performance</h3><span style="font-size:12px;color:var(--text2)">${this.monthLabel(mk)}</span></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:16px">
+          ${this.bar('Leads Sourced',m.leads,this.targets.leadTarget,'min')}
+          ${this.bar('Converted (Won)',m.won,this.targets.convertCap,'max')}
+          ${fbs.overdue?this.alertHTML():''}
+          ${this.targetsFormHTML()}
+        </div>
+      </div>`;
+      const hist=[];
+      for(let i=1;i<=5;i++){
+        const d=new Date();d.setMonth(d.getMonth()-i);
+        const hk=`${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
+        hist.push(this.computeMonth(hk));
+      }
+      html+=`<div class="card" style="margin-top:14px">
+        <div class="card-header"><h3>Performance History</h3></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Month</th><th>Leads</th><th>Converted</th><th>Status</th></tr></thead>
+          <tbody>${hist.map(h=>{
+            const leadOk=h.leads>=this.targets.leadTarget,convOk=h.won<=this.targets.convertCap;
+            const status=leadOk&&convOk?'<span class="badge badge-green">On Target</span>':!leadOk?'<span class="badge badge-red">Leads Short</span>':'<span class="badge badge-gold">Over Cap</span>';
+            return`<tr><td>${this.monthLabel(h.month)}</td><td>${h.leads}</td><td>${h.won}</td><td>${status}</td></tr>`;
+          }).join('')}</tbody>
+        </table></div>
+        <div style="padding:10px 20px;font-size:11px;color:var(--text3)">Measured against the current targets above.</div>
+      </div>`;
+    }else{
+      const rating=this.rating(m);
+      const high=rating==='High';
+      const msg=high?'You\'re on pace this month — keep it up.':'You\'re behind pace this month.';
+      html=`<div class="card">
+        <div class="card-header"><h3>My Performance</h3><span style="font-size:12px;color:var(--text2)">${this.monthLabel(mk)}</span></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="badge ${high?'badge-green':'badge-red'}" style="font-size:14px;padding:8px 18px;font-weight:600">${rating}</span>
+            <span style="font-size:13px;color:var(--text2)">${msg}</span>
+          </div>
+          ${fbs.overdue?this.alertHTML():''}
+        </div>
+      </div>`;
+    }
+    el.innerHTML=html;
+  }
+};
+
 const Dashboard={
   async render(){
     const isAdmin=Auth.isAdmin();
@@ -862,6 +1005,9 @@ const Dashboard={
       <button class="btn btn-gold btn-sm" onclick="Router.go('leads');setTimeout(()=>Leads.openAdd(),200)">+ Add Lead</button>
       <button class="btn btn-ghost btn-sm" onclick="Router.go('feedback');setTimeout(()=>Feedback.openAdd(),200)">+ Log Feedback</button>
     `;
+
+    await Performance.loadTargets();
+    Performance.render(isAdmin);
 
     const recent=[...leads].reverse().slice(0,5);
     $('dash-recent-leads').querySelector('tbody').innerHTML=recent.length
@@ -1028,6 +1174,7 @@ const Feedback={
     this._render();
   },
   _render(){
+    const isAdmin=Auth.isAdmin();
     const all=Cache.feedback,n=all.length;
     const pr=all.filter(f=>f.nps>=9).length,pa=all.filter(f=>f.nps>=7&&f.nps<9).length,de=all.filter(f=>f.nps<7).length;
     const npsScore=n?Math.round(((pr/n)-(de/n))*100):null;
@@ -1041,7 +1188,9 @@ const Feedback={
     const followups=all.filter(f=>f.followupRequired||f.wantsCallback).length;
 
     const banner=$('fb-nps-banner');
-    if(n>0){
+    if(!isAdmin){
+      banner.style.display='none';
+    }else if(n>0){
       banner.style.display='flex';
       $('fb-nps-score-big').textContent=(npsScore>=0?'+':'')+npsScore;
       $('fb-nps-score-big').style.color=npsScore>=50?'var(--green)':npsScore>=0?'var(--gold)':'var(--red)';
@@ -1050,6 +1199,9 @@ const Feedback={
       $('fb-pr-pct').textContent=prP+'%';$('fb-pa-pct').textContent=paP+'%';$('fb-de-pct').textContent=deP+'%';
     }else{banner.style.display='none';}
 
+    if(!isAdmin){
+      $('fb-kpis').innerHTML='';
+    }else{
     $('fb-kpis').innerHTML=`
       <div class="kpi-card kpi-gold"><div class="kpi-label">CSAT Score</div><div class="kpi-value">${csatAvg!==null?csatAvg+'/10':'—'}</div><div class="kpi-sub">${n} responses</div></div>
       <div class="kpi-card kpi-clickable" onclick="Feedback.drilldown('promoters')" style="cursor:pointer"><div class="kpi-label">Promoters</div><div class="kpi-value" style="color:var(--green)">${pr}</div><div class="kpi-sub">NPS 9–10 · click to view</div></div>
@@ -1062,9 +1214,12 @@ const Feedback={
       <div class="kpi-card kpi-clickable" onclick="Feedback.drilldown('followups')" style="cursor:pointer"><div class="kpi-label">Follow-ups Needed</div><div class="kpi-value" style="color:${followups?'var(--gold)':'inherit'}">${followups}</div><div class="kpi-sub">Open items · click to view</div></div>
       <div class="kpi-card kpi-clickable" onclick="Feedback.drilldown('repeatbiz')" style="cursor:pointer"><div class="kpi-label">Repeat Business</div><div class="kpi-value" style="color:var(--green)">${repeatBiz}</div><div class="kpi-sub">Future intent · click to view</div></div>
     `;
+    }
 
     const insightsEl=$('fb-insights');
-    if(n>0){
+    if(!isAdmin){
+      insightsEl.style.display='none';
+    }else if(n>0){
       insightsEl.style.display='block';
       const needFollowup=all.filter(f=>f.followupRequired||f.wantsCallback);
       const futurePurchase=all.filter(f=>f.futureOpportunity);
