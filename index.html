@@ -69,13 +69,45 @@ img{display:block;max-width:100%}
 .btn-gold:hover{background:#f5c020;transform:translateY(-1px);}
 .btn-ghost{background:transparent;color:var(--text2);border:1.5px solid var(--border);}
 .btn-ghost:hover{border-color:var(--text2);color:var(--text);}
-.btn-danger{background:rgba(224,82,82,.12);color:var(--red);border:1.5px solid rgba(224,82,82,.2);}
-.btn-danger:hover{background:rgba(224,82,82,.22);}
+.btn-danger{background:transparent;color:var(--red);border:1.5px solid rgba(239,68,68,.25);}
+.btn-danger:hover{background:rgba(224,82,82,.1);}
 .btn-full{width:100%;}
 .btn-sm{padding:8px 14px;font-size:13px;}
 .btn-icon{padding:8px;width:36px;height:36px;border-radius:var(--radius-sm);}
 
-/* SHELL */
+/* FORM controls */
+.field{margin-bottom:18px;}
+.label{display:block;font-size:12px;font-weight:600;color:#888;margin-bottom:7px;text-transform:uppercase;letter-spacing:.05em;}
+
+/* Tables */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);border-bottom:1px solid var(--border);}
+td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface2);}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap;}
+.badge-gold{background:rgba(250,178,2,.15);color:var(--gold);}
+.badge-green{background:rgba(61,184,122,.15);color:var(--green);}
+.badge-red{background:rgba(224,82,82,.15);color:var(--red);}
+.badge-blue{background:rgba(74,159,232,.15);color:var(--blue);}
+.badge-grey{background:var(--surface3);color:var(--text2);}
+.stage-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 12px;flex:1;min-width:180px;transition:border-color var(--trans);}
+.search-box:focus-within{border-color:var(--gold);}
+.search-box svg{color:var(--text3);width:15px;height:15px;flex-shrink:0;}
+.search-box input{padding:10px 0;flex:1;}
+.search-box input::placeholder{color:var(--text3);}
+select.filter-sel{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--text);cursor:pointer;transition:border-color var(--trans);}
+select.filter-sel:focus{border-color:var(--gold);}
+
+/* LAYOUT / SHELL */
+.shell{display:flex;height:100vh;overflow:hidden}
 #app{display:none;height:100%;}
 #app.active{display:flex;}
 #sidebar{width:var(--sidebar);height:100%;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:relative;z-index:10;}
@@ -145,39 +177,6 @@ img{display:block;max-width:100%}
 .card-header h3{font-size:14px;font-weight:600;}
 .card-body{padding:20px;}
 
-/* TABLE */
-.tbl-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;}
-th{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);padding:10px 14px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--border);}
-td{padding:13px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:var(--surface2);}
-.tbl-empty{text-align:center;padding:40px;color:var(--text3);font-size:13px;}
-
-/* BADGES */
-.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap;}
-.badge-gold{background:rgba(250,178,2,.15);color:var(--gold);}
-.badge-green{background:rgba(61,184,122,.15);color:var(--green);}
-.badge-red{background:rgba(224,82,82,.15);color:var(--red);}
-.badge-blue{background:rgba(74,159,232,.15);color:var(--blue);}
-.badge-grey{background:var(--surface3);color:var(--text2);}
-.stage-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;}
-
-/* TOOLBAR */
-.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
-.search-box{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 12px;flex:1;min-width:180px;transition:border-color var(--trans);}
-.search-box:focus-within{border-color:var(--gold);}
-.search-box svg{color:var(--text3);width:15px;height:15px;flex-shrink:0;}
-.search-box input{padding:10px 0;flex:1;}
-.search-box input::placeholder{color:var(--text3);}
-select.filter-sel{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--text);cursor:pointer;transition:border-color var(--trans);}
-select.filter-sel:focus{border-color:var(--gold);}
-
-/* DASHBOARD */
-.dash-charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}
-.chart-wrap{position:relative;height:200px;}
-.quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;}
-
 /* SYNC STATUS */
 .sync-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:20px;font-size:12px;color:var(--text2);}
 .sync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
@@ -185,6 +184,17 @@ select.filter-sel:focus{border-color:var(--gold);}
 .sync-dot.loading{background:var(--gold);animation:pulse 1s infinite;}
 .sync-dot.error{background:var(--red);}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* PERSISTENT OFFICER SYNC STATUS CARD */
+.officer-sync-card{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:var(--radius);margin-bottom:20px;border:1px solid var(--border);background:linear-gradient(135deg,var(--surface),var(--surface2));}
+.officer-sync-dotwrap{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(61,184,122,.12);}
+.officer-sync-dotwrap .dot{width:9px;height:9px;border-radius:50%;background:var(--green);}
+.officer-sync-dotwrap.error{background:rgba(224,82,82,.12);}
+.officer-sync-dotwrap.error .dot{background:var(--red);}
+.officer-sync-dotwrap.loading{background:rgba(250,178,2,.12);}
+.officer-sync-dotwrap.loading .dot{background:var(--gold);animation:pulse 1s infinite;}
+.officer-sync-text strong{font-size:13px;font-weight:600;color:var(--text);display:block;}
+.officer-sync-text span{font-size:12px;color:var(--text2);}
 
 /* CLOCK WIDGET */
 .clock-widget{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden;}
@@ -233,25 +243,6 @@ select.filter-sel:focus{border-color:var(--gold);}
 .nps-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);}
 .nps-value-display{text-align:center;font-family:'Playfair Display',serif;font-size:36px;font-weight:600;color:var(--gold);margin:12px 0 4px;}
 
-/* FEEDBACK QUESTIONS editor */
-.fq-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
-.fq-item{display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;}
-.fq-item span{flex:1;}
-.fq-remove{color:var(--red);font-size:18px;cursor:pointer;line-height:1;padding:0 4px;}
-.fq-add{display:flex;gap:8px;margin-top:4px;}
-.fq-add input{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);}
-.fq-add input:focus{border-color:var(--gold);outline:none;}
-
-/* SETUP SCREEN */
-#setup-screen{position:fixed;inset:0;z-index:998;display:none;align-items:center;justify-content:center;background:var(--bg);}
-#setup-screen.open{display:flex;}
-.setup-card{width:100%;max-width:480px;padding:48px 40px;background:var(--surface);border:1px solid var(--border);border-radius:20px;}
-.setup-card h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;margin-bottom:8px;}
-.setup-card p{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.6;}
-.setup-steps{margin-bottom:24px;}
-.setup-step{display:flex;gap:12px;margin-bottom:14px;font-size:13px;align-items:flex-start;}
-.setup-step-num{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#000;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
-
 /* TOAST */
 #toast-container{position:fixed;bottom:80px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
 .toast{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);font-size:13px;font-weight:500;min-width:220px;pointer-events:auto;animation:toast-in .22s ease;}
@@ -285,6 +276,9 @@ select.filter-sel:focus{border-color:var(--gold);}
 }
 @media(min-width:769px){#mobile-menu-btn{display:none!important;}}
 @media(max-width:480px){.kpi-value{font-size:26px;}.page-header{flex-direction:column;align-items:flex-start;}}
+.dash-charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}
+.chart-wrap{position:relative;height:200px;}
+.quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;}
 </style>
 </head>
 <body>
@@ -368,6 +362,7 @@ select.filter-sel:focus{border-color:var(--gold);}
       <!-- DASHBOARD -->
       <div class="view active" id="view-dashboard">
         <div id="officer-clock-widget"></div>
+        <div id="officer-sync-indicator"></div>
         <div class="kpi-grid" id="dash-kpis"></div>
         <div id="perf-section" style="margin-bottom:20px"></div>
         <div class="quick-actions" id="dash-quickactions"></div>
@@ -634,9 +629,50 @@ const GS={
 /* ── SYNC BAR ──────────────────────────────────────── */
 const SyncBar={
   show(){$('sync-bar').style.display='flex';},
-  loading(msg){this.show();$('sync-dot').className='sync-dot loading';$('sync-label').textContent=msg||'Syncing…';},
-  ok(){$('sync-dot').className='sync-dot ok';$('sync-label').textContent='Synced with Google Sheets';setTimeout(()=>{$('sync-bar').style.display='none';},2500);},
-  error(msg){this.show();$('sync-dot').className='sync-dot error';$('sync-label').textContent=msg;},
+  loading(msg){
+    this.show();$('sync-dot').className='sync-dot loading';$('sync-label').textContent=msg||'Syncing…';
+    OfficerSyncIndicator.loading(msg);
+  },
+  ok(){
+    $('sync-dot').className='sync-dot ok';$('sync-label').textContent='Synced with Google Sheets';setTimeout(()=>{$('sync-bar').style.display='none';},2500);
+    OfficerSyncIndicator.ok();
+  },
+  error(msg){
+    this.show();$('sync-dot').className='sync-dot error';$('sync-label').textContent=msg;
+    OfficerSyncIndicator.error(msg);
+  },
+};
+
+/* ── OFFICER-FACING PERSISTENT SYNC INDICATOR ───────
+   Unlike the top sync-bar (which flashes briefly and hides), this card
+   stays visible on the Officer's dashboard at all times so Esther always
+   has a clear, permanent signal that her entries are saving to the real
+   Google Sheet — not just a temporary toast she might miss.
+──────────────────────────────────────────────────── */
+const OfficerSyncIndicator={
+  el(){return $('officer-sync-indicator');},
+  isOfficerView(){return this.el() && !Auth.isAdmin();},
+  render(state,label){
+    const host=this.el();
+    if(!host) return;
+    const icons={
+      ok:'<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>',
+      loading:'<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>',
+      error:'<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>',
+    };
+    const colorClass=state==='ok'?'':state==='error'?'error':'loading';
+    host.innerHTML=`
+      <div class="officer-sync-card">
+        <div class="officer-sync-dotwrap ${colorClass}"><span class="dot"></span></div>
+        <div class="officer-sync-text">
+          <strong>${state==='ok'?'Connected to Google Sheets':state==='error'?'Sync problem':'Connecting…'}</strong>
+          <span>${esc(label||(state==='ok'?'Everything you save here goes straight to the live spreadsheet.':state==='error'?'Your last save may not have gone through — check your connection.':'Checking connection to Google Sheets…'))}</span>
+        </div>
+      </div>`;
+  },
+  loading(msg){if(this.isOfficerView()) this.render('loading',msg);},
+  ok(){if(this.isOfficerView()) this.render('ok');},
+  error(msg){if(this.isOfficerView()) this.render('error',msg);},
 };
 
 /* ── IN-MEMORY CACHE ───────────────────────────────── */
@@ -819,14 +855,6 @@ let pipelineChart=null,npsChart=null,clockWidgetTick=null;
 
 /* ══════════════════════════════════════════════════
    PERFORMANCE TRACKING
-   Default monthly target: >=100 leads sourced, <=50 converted (Won).
-   Admin can override these from the dashboard; stored via GS.getConfig/
-   setConfig so both Admin and Officer see the same numbers.
-   Feedback logging: expected at least once per month by the 10th.
-   NOTE: leads aren't currently tagged per-officer in the sheet, so this
-   reflects overall team lead activity for the month (accurate while there's
-   one Officer; if more staff are added later, a "created by" column would
-   be needed to split totals per person).
 ══════════════════════════════════════════════════ */
 const DEFAULT_LEAD_TARGET=100,DEFAULT_CONVERT_CAP=50,FEEDBACK_DEADLINE_DAY=10;
 const Performance={
@@ -863,7 +891,6 @@ const Performance={
     const overdue=isCurrent&&!logged&&now.getDate()>FEEDBACK_DEADLINE_DAY;
     return{logged,overdue};
   },
-  // Pace-adjusted rating so early-in-the-month numbers aren't unfairly flagged "Low".
   rating(m){
     const now=new Date();
     const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
@@ -874,7 +901,6 @@ const Performance={
     return(leadsOnPace&&withinCap)?'High':'Low';
   },
   bar(label,value,target,mode){
-    // mode 'min' = target is a floor (green once reached); 'max' = target is a cap (red once exceeded)
     const pct=Math.min(100,Math.round(value/Math.max(target,1)*100));
     let color;
     if(mode==='min') color=value>=target?'var(--green)':'var(--gold)';
@@ -956,12 +982,17 @@ const Performance={
 const Dashboard={
   async render(){
     const isAdmin=Auth.isAdmin();
+
+    if(!isAdmin) OfficerSyncIndicator.render('loading','Checking connection to Google Sheets…');
+
     const [leadsRaw,fbRaw,attRaw]=await Promise.all([
       GS.get('Leads'),GS.get('Feedback'),GS.get('Attendance')
     ]);
     Cache.leads=leadsRaw.map(rowToLead);
     Cache.feedback=fbRaw.map(rowToFeedback);
     Cache.attendance=attRaw.map(rowToAtt);
+
+    if(!isAdmin) OfficerSyncIndicator.render('ok');
 
     const leads=Cache.leads,fb=Cache.feedback,att=Cache.attendance;
     const todayStr=today();
@@ -980,6 +1011,7 @@ const Dashboard={
       this.updateClockWidgetStatus();
     } else {
       cw.innerHTML='';
+      const oi=OfficerSyncIndicator.el();if(oi) oi.innerHTML='';
       if(clockWidgetTick){clearInterval(clockWidgetTick);clockWidgetTick=null;}
     }
 
@@ -1014,7 +1046,6 @@ const Dashboard={
       ?recent.map(l=>`<tr onclick="Router.go('leads')" style="cursor:pointer"><td><strong>${esc(l.name)}</strong></td><td>${esc(l.product)}</td><td>${stageBadge(l.stage)}</td><td style="color:${l.followup&&l.followup<todayStr?'var(--red)':'inherit'}">${l.followup?fmt(l.followup):'—'}</td></tr>`).join('')
       :`<tr><td colspan="4" class="tbl-empty">No leads yet.</td></tr>`;
 
-    // Charts
     const stageCounts={};STAGES.forEach(s=>{stageCounts[s]=0;});leads.forEach(l=>{if(l.stage in stageCounts) stageCounts[l.stage]++;});
     const sl=Object.keys(stageCounts).filter(k=>stageCounts[k]>0);
     if(pipelineChart) pipelineChart.destroy();
