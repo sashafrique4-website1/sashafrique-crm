@@ -426,12 +426,54 @@ select.filter-sel:focus{border-color:var(--gold);}
             <option>New Lead</option><option>Contacted</option><option>Follow-Up Needed</option>
             <option>Quotation Sent</option><option>Negotiating</option><option>Won</option><option>Lost</option>
           </select>
+          <select class="filter-sel" id="leads-agent" onchange="Leads.render()">
+            <option value="">All agents</option>
+          </select>
         </div>
         <div class="card">
           <div class="tbl-wrap">
             <table>
               <thead><tr><th>Name</th><th>Contact</th><th>Product</th><th>Stage</th><th>Follow-up</th><th></th></tr></thead>
               <tbody id="leads-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- AGENTS -->
+      <div class="view" id="view-agents">
+        <div class="page-header">
+          <div class="page-header-left"><h2>Sales Agents</h2><p>Manage campus recruiters and see what each agent has brought in.</p></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="Agents.openReport()">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2a4 4 0 014-4h4M9 17H7a2 2 0 01-2-2V5a2 2 0 012-2h6l4 4v3m-8 7h.01M17 21l-4-4 4-4"/></svg>
+              Report for Finance
+            </button>
+            <button class="btn btn-gold btn-sm" onclick="Agents.openAdd()">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+              Add Agent
+            </button>
+          </div>
+        </div>
+        <div class="kpi-grid" id="agents-kpis"></div>
+        <div class="toolbar">
+          <div class="search-box">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/></svg>
+            <input type="text" id="agents-search" placeholder="Search by name, phone, campus…" oninput="Agents.render()"/>
+          </div>
+          <select class="filter-sel" id="agents-campus" onchange="Agents.render()">
+            <option value="">All campuses</option>
+          </select>
+          <select class="filter-sel" id="agents-status" onchange="Agents.render()">
+            <option value="">All statuses</option>
+            <option>Active</option><option>Inactive</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Agent</th><th>Contact</th><th>Campus</th><th>Status</th><th>Leads Sourced</th><th>Orders (Won)</th><th></th></tr></thead>
+              <tbody id="agents-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -698,7 +740,7 @@ const OfficerSyncIndicator={
 
 /* ── IN-MEMORY CACHE ───────────────────────────────── */
 const Cache={
-  leads:[],feedback:[],attendance:[],calllog:[],
+  leads:[],feedback:[],attendance:[],calllog:[],agents:[],
 };
 
 /* ── AUTH ──────────────────────────────────────────── */
@@ -757,8 +799,8 @@ const Modal={
 };
 
 /* ── ROUTER ────────────────────────────────────────── */
-const VIEWS_ADMIN={dashboard:{title:'Dashboard'},leads:{title:'Leads'},feedback:{title:'Achiever Feedback'},calllog:{title:'Call Log'},analysis:{title:'Analysis & Insights'},attendance:{title:'Attendance Report'}};
-const VIEWS_OFFICER={dashboard:{title:'Dashboard'},leads:{title:'Leads'},feedback:{title:'Achiever Feedback'},calllog:{title:'Call Log'},analysis:{title:'Analysis & Insights'}};
+const VIEWS_ADMIN={dashboard:{title:'Dashboard'},leads:{title:'Leads'},agents:{title:'Sales Agents'},feedback:{title:'Achiever Feedback'},calllog:{title:'Call Log'},analysis:{title:'Analysis & Insights'},attendance:{title:'Attendance Report'}};
+const VIEWS_OFFICER={dashboard:{title:'Dashboard'},leads:{title:'Leads'},agents:{title:'Sales Agents'},feedback:{title:'Achiever Feedback'},calllog:{title:'Call Log'},analysis:{title:'Analysis & Insights'}};
 const Router={
   current:'dashboard',
   async go(v){
@@ -773,6 +815,7 @@ const Router={
     $('topbar-title').textContent=views[v].title;
     if(v==='dashboard') await Dashboard.render();
     else if(v==='leads') await Leads.render();
+    else if(v==='agents') await Agents.render();
     else if(v==='feedback') await Feedback.render();
     else if(v==='calllog') await CallLog.render();
     else if(v==='analysis') await Analysis.render();
@@ -788,13 +831,14 @@ const NAV_ICONS={
   feedback:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>',
   attendance:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
   calllog:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>',
+  agents:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.125-1.28-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.125-1.28.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zM6.5 7a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/></svg>',
   analysis:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2"/></svg>',
 };
 function buildNav(){
   const isAdmin=Auth.isAdmin();
-  const items=isAdmin?['dashboard','leads','feedback','calllog','analysis','attendance']:['dashboard','leads','feedback','calllog','analysis'];
-  const labels={dashboard:'Dashboard',leads:'Leads',feedback:'Feedback',calllog:'Calls',analysis:'Analysis',attendance:'Attendance'};
-  const bnavLabels={dashboard:'Home',leads:'Leads',feedback:'Feedback',calllog:'Calls',analysis:'Insights',attendance:'Reports'};
+  const items=isAdmin?['dashboard','leads','agents','feedback','calllog','analysis','attendance']:['dashboard','leads','agents','feedback','calllog','analysis'];
+  const labels={dashboard:'Dashboard',leads:'Leads',agents:'Agents',feedback:'Feedback',calllog:'Calls',analysis:'Analysis',attendance:'Attendance'};
+  const bnavLabels={dashboard:'Home',leads:'Leads',agents:'Agents',feedback:'Feedback',calllog:'Calls',analysis:'Insights',attendance:'Reports'};
   $('sidebar-nav-items').innerHTML=`
     <div class="nav-section-label">Overview</div>
     ${items.map(v=>`
@@ -827,10 +871,16 @@ function npsLabel(n){return n>=9?'Promoter':n>=7?'Passive':'Detractor';}
 
 /* ── LEAD ROW HELPERS ──────────────────────────────── */
 function leadToRow(l){
-  return[l.id,l.name,l.phone,l.email,l.school,l.programme||'',l.company,l.product,l.source,l.stage,l.followup,l.notes,l.created];
+  return[l.id,l.name,l.phone,l.email,l.school,l.programme||'',l.company,l.product,l.source,l.stage,l.followup,l.notes,l.created,l.agentId||''];
 }
 function rowToLead(r){
-  return{id:r.id,name:r.name,phone:r.phone,email:r.email,school:r.school,programme:r.programme||'',company:r.company,product:r.product,source:r.source,stage:r.stage,followup:r.followup||'',notes:r.notes,created:r.created};
+  return{id:r.id,name:r.name,phone:r.phone,email:r.email,school:r.school,programme:r.programme||'',company:r.company,product:r.product,source:r.source,stage:r.stage,followup:r.followup||'',notes:r.notes,created:r.created,agentId:r.agentId||''};
+}
+function agentToRow(a){
+  return[a.id,a.name,a.phone,a.email||'',a.campus,a.status||'Active',a.dateJoined||'',a.notes||''];
+}
+function rowToAgent(r){
+  return{id:r.id,name:r.name,phone:r.phone,email:r.email||'',campus:r.campus||'',status:r.status||'Active',dateJoined:r.dateJoined||'',notes:r.notes||''};
 }
 function callToRow(c){return[c.id,c.name,c.orderNo,c.date,c.time,c.outcome,c.staff,c.notes];}
 function rowToCall(r){return{id:r.id,name:r.name||'',orderNo:r.orderNo||'',date:r.date||'',time:r.time||'',outcome:r.outcome||'',staff:r.staff||'',notes:r.notes||''};}
@@ -1125,22 +1175,61 @@ const Dashboard={
 ══════════════════════════════════════════════════ */
 const PRODUCTS=['Graduation Sash','Honour Sash','Corporate Sash','Custom Sash','Event Sash'];
 const SOURCES=['Referral','Instagram','LinkedIn','Walk-in','WhatsApp','Event','Other'];
+
+/* ── TERTIARY CAMPUSES (default list; agents can add more) ── */
+const CAMPUSES=[
+  'University of Ghana (UG)','Kwame Nkrumah University of Science and Technology (KNUST)',
+  'University of Cape Coast (UCC)','University of Education, Winneba (UEW)',
+  'University for Development Studies (UDS)','University of Mines and Technology (UMaT)',
+  'University of Health and Allied Sciences (UHAS)','University of Energy and Natural Resources (UENR)',
+  'Ghana Communication Technology University (GCTU)',
+  'C.K. Tedam University of Technology and Applied Sciences (CKT-UTAS)',
+  'Akenten Appiah-Menka University (AAMUSTED)',
+  'SD Dombo University of Business & Integrated Dev. Studies (SDD-UBIDS)',
+  'Accra Technical University','Kumasi Technical University','Takoradi Technical University',
+  'Ho Technical University','Sunyani Technical University','Cape Coast Technical University',
+  'Koforidua Technical University','Tamale Technical University','Bolgatanga Technical University',
+  'Wa Technical University',
+  'University of Professional Studies, Accra (UPSA)','Ashesi University','Central University',
+  'Valley View University','Pentecost University','Presbyterian University, Ghana',
+  'Methodist University Ghana','Catholic University of Ghana',
+  'Ghana Institute of Management and Public Administration (GIMPA)',
+  'Regent University College','Wisconsin International University College',
+  'Zenith University College','Islamic University College, Ghana','Data Link Institute',
+  'Marshalls University College','Radford University College','All Nations University College',
+  'Lancaster University Ghana','Webster University Ghana',
+];
+const AGENT_STATUSES=['Active','Inactive'];
+const CAMPUS_OTHER_VALUE='__other__';
 const Leads={
   async render(){
     if(!Cache.leads.length){
       const raw=await GS.get('Leads');
       Cache.leads=raw.map(rowToLead);
     }
+    if(!Cache.agents.length){
+      const raw=await GS.get('Agents');
+      Cache.agents=raw.map(rowToAgent);
+    }
     this._render();
   },
+  agentName(id){return Cache.agents.find(a=>a.id===id)?.name||'';},
   _render(){
     const q=$('leads-search').value.toLowerCase();
     const sf=$('leads-stage').value;
+    const af=$('leads-agent')?.value||'';
     let leads=[...Cache.leads];
     if(q) leads=leads.filter(l=>[l.name,l.phone,l.email,l.school,l.company].join(' ').toLowerCase().includes(q));
     if(sf) leads=leads.filter(l=>l.stage===sf);
+    if(af) leads=leads.filter(l=>l.agentId===af);
     leads.sort((a,b)=>a.name.localeCompare(b.name));
     const t=today();
+    const agentSel=$('leads-agent');
+    if(agentSel){
+      const cur=agentSel.value;
+      const sorted=[...Cache.agents].sort((a,b)=>a.name.localeCompare(b.name));
+      agentSel.innerHTML=`<option value="">All agents</option>${sorted.map(a=>`<option value="${a.id}" ${a.id===cur?'selected':''}>${esc(a.name)}</option>`).join('')}`;
+    }
     const tbody=$('leads-tbody');
     if(!leads.length){
       tbody.innerHTML=`<tr><td colspan="6"><div class="empty-state"><div class="empty-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.125-1.28-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.125-1.28.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><h4>No leads found</h4><p>Add your first lead or adjust filters.</p><button class="btn btn-gold btn-sm" onclick="Leads.openAdd()">Add Lead</button></div></td></tr>`;
@@ -1149,7 +1238,7 @@ const Leads={
     tbody.innerHTML=leads.map(l=>{
       const ov=l.followup&&l.followup<t&&!['Won','Lost'].includes(l.stage);
       return`<tr>
-        <td><strong>${esc(l.name)}</strong>${l.school?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(l.school)}</div>`:''}${l.company?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(l.company)}</div>`:''}</td>
+        <td><strong>${esc(l.name)}</strong>${l.school?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(l.school)}</div>`:''}${l.company?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(l.company)}</div>`:''}${l.agentId?`<div style="font-size:11px;color:var(--gold);margin-top:2px">Agent: ${esc(this.agentName(l.agentId)||'—')}</div>`:''}</td>
         <td>${l.phone?`<div>${esc(l.phone)}</div>`:''}${l.email?`<div style="font-size:11px;color:var(--text2)">${esc(l.email)}</div>`:''}</td>
         <td>${esc(l.product)}</td><td>${stageBadge(l.stage)}</td>
         <td style="color:${ov?'var(--red)':'inherit'};font-weight:${ov?600:400}">${l.followup?fmt(l.followup):'—'}${ov?'<div style="font-size:10px;color:var(--red)">Overdue</div>':''}</td>
@@ -1165,11 +1254,14 @@ const Leads={
     const po=PRODUCTS.map(v=>`<option ${l.product===v?'selected':''}>${esc(v)}</option>`).join('');
     const so=SOURCES.map(v=>`<option ${l.source===v?'selected':''}>${esc(v)}</option>`).join('');
     const sto=STAGES.map(s=>`<option ${l.stage===s?'selected':''}>${esc(s)}</option>`).join('');
+    const agentsSorted=[...Cache.agents].sort((a,b)=>a.name.localeCompare(b.name));
+    const ao=agentsSorted.map(a=>`<option value="${a.id}" ${l.agentId===a.id?'selected':''}>${esc(a.name)}${a.campus?' — '+esc(a.campus):''}</option>`).join('');
     return`
     <div class="form-grid">
       <div class="form-row"><label>Full Name *</label><input id="f-name" value="${esc(l.name||'')}" placeholder="Akosua Mensah"/></div>
       <div class="form-row"><label>Phone *</label><input id="f-phone" value="${esc(l.phone||'')}" placeholder="024 XXX XXXX"/></div>
     </div>
+    <div class="form-row"><label>Sourced by Agent</label><select id="f-agent"><option value="">— none / direct —</option>${ao}</select></div>
     <div class="form-row"><label>Email</label><input id="f-email" type="email" value="${esc(l.email||'')}" placeholder="optional"/></div>
     <div class="form-grid">
       <div class="form-row"><label>School / University</label><input id="f-school" value="${esc(l.school||'')}" placeholder="UPSA, UG, KNUST…"/></div>
@@ -1188,7 +1280,7 @@ const Leads={
   collect(ex={}){
     const name=$('f-name').value.trim(),phone=$('f-phone').value.trim(),product=$('f-product').value;
     if(!name||!phone||!product){Toast.show('Name, phone and product are required.','error');return null;}
-    return{...ex,name,phone,email:$('f-email').value.trim(),school:$('f-school').value.trim(),company:$('f-company').value.trim(),product,source:$('f-source').value,stage:$('f-stage').value||'New Lead',followup:$('f-followup').value,notes:$('f-notes').value.trim()};
+    return{...ex,name,phone,email:$('f-email').value.trim(),school:$('f-school').value.trim(),company:$('f-company').value.trim(),product,source:$('f-source').value,stage:$('f-stage').value||'New Lead',followup:$('f-followup').value,notes:$('f-notes').value.trim(),agentId:$('f-agent').value};
   },
   openAdd(){Modal.open('Add Lead',this.formHTML(),`<button class="btn btn-ghost" onclick="Modal.close()">Cancel</button><button class="btn btn-gold" onclick="Leads.save()">Add Lead</button>`);},
   openEdit(id){const l=Cache.leads.find(r=>r.id===id);if(!l)return;Modal.open('Edit Lead',this.formHTML(l),`<button class="btn btn-ghost" onclick="Modal.close()">Cancel</button><button class="btn btn-gold" onclick="Leads.save('${id}')">Save Changes</button>`);},
@@ -1216,6 +1308,178 @@ const Leads={
     if(!ok) return;
     Cache.leads=Cache.leads.filter(r=>r.id!==id);
     Toast.show('Lead deleted.','info');this._render();
+  },
+};
+
+/* ══════════════════════════════════════════════════
+   SALES AGENTS
+══════════════════════════════════════════════════ */
+const Agents={
+  async render(){
+    if(!Cache.agents.length){
+      const raw=await GS.get('Agents');
+      Cache.agents=raw.map(rowToAgent);
+    }
+    if(!Cache.leads.length){
+      const raw=await GS.get('Leads');
+      Cache.leads=raw.map(rowToLead);
+    }
+    this._populateCampusFilter();
+    this._render();
+  },
+  _populateCampusFilter(){
+    const sel=$('agents-campus');if(!sel)return;
+    const cur=sel.value;
+    const used=[...new Set(Cache.agents.map(a=>a.campus).filter(Boolean))];
+    const all=[...new Set([...CAMPUSES,...used])].sort((a,b)=>a.localeCompare(b));
+    sel.innerHTML=`<option value="">All campuses</option>${all.map(c=>`<option ${c===cur?'selected':''}>${esc(c)}</option>`).join('')}`;
+  },
+  statsFor(agentId){
+    const leads=Cache.leads.filter(l=>l.agentId===agentId);
+    const won=leads.filter(l=>l.stage==='Won');
+    return{sourced:leads.length,orders:won.length};
+  },
+  _render(){
+    const q=$('agents-search').value.toLowerCase();
+    const cf=$('agents-campus').value;
+    const sf=$('agents-status').value;
+    let agents=[...Cache.agents];
+    if(q) agents=agents.filter(a=>[a.name,a.phone,a.email,a.campus].join(' ').toLowerCase().includes(q));
+    if(cf) agents=agents.filter(a=>a.campus===cf);
+    if(sf) agents=agents.filter(a=>(a.status||'Active')===sf);
+    agents.sort((a,b)=>a.name.localeCompare(b.name));
+
+    const activeCount=Cache.agents.filter(a=>(a.status||'Active')==='Active').length;
+    const totalOrders=Cache.agents.reduce((s,a)=>s+this.statsFor(a.id).orders,0);
+    const totalSourced=Cache.agents.reduce((s,a)=>s+this.statsFor(a.id).sourced,0);
+    $('agents-kpis').innerHTML=`
+      <div class="kpi-card kpi-gold"><div class="kpi-label">Total Agents</div><div class="kpi-value">${Cache.agents.length}</div><div class="kpi-sub">${activeCount} active</div></div>
+      <div class="kpi-card"><div class="kpi-label">Leads Sourced</div><div class="kpi-value">${totalSourced}</div><div class="kpi-sub">All agents, all time</div></div>
+      <div class="kpi-card"><div class="kpi-label">Orders (Won)</div><div class="kpi-value" style="color:var(--green)">${totalOrders}</div><div class="kpi-sub">Commission-eligible</div></div>
+    `;
+
+    const tbody=$('agents-tbody');
+    if(!agents.length){
+      tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.125-1.28-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.125-1.28.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><h4>No agents found</h4><p>Add your first campus recruiter to start tracking leads.</p><button class="btn btn-gold btn-sm" onclick="Agents.openAdd()">Add Agent</button></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML=agents.map(a=>{
+      const st=this.statsFor(a.id);
+      const active=(a.status||'Active')==='Active';
+      return`<tr>
+        <td><strong>${esc(a.name)}</strong>${a.dateJoined?`<div style="font-size:11px;color:var(--text2);margin-top:2px">Joined ${fmt(a.dateJoined)}</div>`:''}</td>
+        <td>${a.phone?`<div>${esc(a.phone)}</div>`:''}${a.email?`<div style="font-size:11px;color:var(--text2)">${esc(a.email)}</div>`:''}</td>
+        <td>${esc(a.campus||'—')}</td>
+        <td><span class="badge ${active?'badge-green':'badge-grey'}">${active?'Active':'Inactive'}</span></td>
+        <td>${st.sourced}</td>
+        <td><strong style="color:var(--gold)">${st.orders}</strong></td>
+        <td><div style="display:flex;gap:6px;justify-content:flex-end">
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="Agents.openEdit('${a.id}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+          <button class="btn btn-danger btn-icon btn-sm" onclick="Agents.remove('${a.id}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+        </div></td>
+      </tr>`;}).join('');
+  },
+  campusOptionsHTML(selected){
+    const used=[...new Set(Cache.agents.map(a=>a.campus).filter(Boolean))];
+    const all=[...new Set([...CAMPUSES,...used])].sort((a,b)=>a.localeCompare(b));
+    const isKnown=!selected||all.includes(selected);
+    return`<option value="">— select campus —</option>${all.map(c=>`<option ${c===selected?'selected':''}>${esc(c)}</option>`).join('')}<option value="${CAMPUS_OTHER_VALUE}" ${!isKnown?'selected':''}>+ Add new campus…</option>`;
+  },
+  formHTML(a={}){
+    const so=AGENT_STATUSES.map(s=>`<option ${((a.status||'Active')===s)?'selected':''}>${esc(s)}</option>`).join('');
+    const knownCampus=!a.campus||[...CAMPUSES,...Cache.agents.map(x=>x.campus)].includes(a.campus);
+    return`
+    <div class="form-grid">
+      <div class="form-row"><label>Full Name *</label><input id="f-a-name" value="${esc(a.name||'')}" placeholder="Kwabena Owusu"/></div>
+      <div class="form-row"><label>Phone *</label><input id="f-a-phone" value="${esc(a.phone||'')}" placeholder="024 XXX XXXX"/></div>
+    </div>
+    <div class="form-row"><label>Email</label><input id="f-a-email" type="email" value="${esc(a.email||'')}" placeholder="optional"/></div>
+    <div class="form-row">
+      <label>Campus / Tertiary Institution *</label>
+      <select id="f-a-campus" onchange="Agents._toggleCampusOther()">${this.campusOptionsHTML(a.campus||'')}</select>
+      <input id="f-a-campus-other" value="${!knownCampus?esc(a.campus):''}" placeholder="Type campus name…" style="margin-top:8px;display:${!knownCampus?'block':'none'}"/>
+    </div>
+    <div class="form-grid">
+      <div class="form-row"><label>Status</label><select id="f-a-status">${so}</select></div>
+      <div class="form-row"><label>Date Joined</label><input id="f-a-joined" type="date" value="${esc(a.dateJoined||'')}"/></div>
+    </div>
+    <div class="form-row"><label>Notes</label><textarea id="f-a-notes" placeholder="Anything worth noting…">${esc(a.notes||'')}</textarea></div>`;
+  },
+  _toggleCampusOther(){
+    const sel=$('f-a-campus'),other=$('f-a-campus-other');
+    if(!sel||!other)return;
+    const isOther=sel.value===CAMPUS_OTHER_VALUE;
+    other.style.display=isOther?'block':'none';
+    if(isOther) other.focus();
+  },
+  collect(ex={}){
+    const name=$('f-a-name').value.trim(),phone=$('f-a-phone').value.trim();
+    const selVal=$('f-a-campus').value;
+    const campus=selVal===CAMPUS_OTHER_VALUE?$('f-a-campus-other').value.trim():selVal;
+    if(!name||!phone||!campus){Toast.show('Name, phone and campus are required.','error');return null;}
+    return{...ex,name,phone,email:$('f-a-email').value.trim(),campus,status:$('f-a-status').value||'Active',dateJoined:$('f-a-joined').value,notes:$('f-a-notes').value.trim()};
+  },
+  openAdd(){Modal.open('Add Agent',this.formHTML(),`<button class="btn btn-ghost" onclick="Modal.close()">Cancel</button><button class="btn btn-gold" onclick="Agents.save()">Add Agent</button>`);},
+  openEdit(id){const a=Cache.agents.find(r=>r.id===id);if(!a)return;Modal.open('Edit Agent',this.formHTML(a),`<button class="btn btn-ghost" onclick="Modal.close()">Cancel</button><button class="btn btn-gold" onclick="Agents.save('${id}')">Save Changes</button>`);},
+  async save(id){
+    if(id){
+      const ex=Cache.agents.find(r=>r.id===id);
+      const d=this.collect(ex);if(!d)return;
+      const ok=await GS.update('Agents',id,d);
+      if(!ok) return;
+      const i=Cache.agents.findIndex(r=>r.id===id);
+      if(i>-1) Cache.agents[i]={...Cache.agents[i],...d};
+      Toast.show('Agent updated.');
+    }else{
+      const d=this.collect({id:uid(),dateJoined:$('f-a-joined').value||today()});if(!d)return;
+      const ok=await GS.append('Agents',agentToRow(d));
+      if(!ok) return;
+      Cache.agents.push(d);
+      Toast.show('Agent added.');
+    }
+    Modal.close();this._populateCampusFilter();this._render();
+  },
+  async remove(id){
+    const st=this.statsFor(id);
+    const msg=st.sourced>0?`This agent has ${st.sourced} lead(s) linked to them. Delete anyway? (their leads will remain, just unlinked)`:'Delete this agent?';
+    if(!confirm(msg)) return;
+    const ok=await GS.delete('Agents',id);
+    if(!ok) return;
+    Cache.agents=Cache.agents.filter(r=>r.id!==id);
+    Toast.show('Agent deleted.','info');this._populateCampusFilter();this._render();
+  },
+  openReport(){
+    const rows=[...Cache.agents].sort((a,b)=>a.name.localeCompare(b.name)).map(a=>{
+      const st=this.statsFor(a.id);
+      return{...a,...st};
+    });
+    const body=`
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Orders = leads tagged to the agent that reached <strong>Won</strong>. Send this to Finance for commission calculation.</p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Agent</th><th>Campus</th><th>Leads Sourced</th><th>Orders (Won)</th></tr></thead>
+        <tbody>${rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.campus||'—')}</td><td>${r.sourced}</td><td><strong>${r.orders}</strong></td></tr>`).join('')||'<tr><td colspan="4" class="tbl-empty">No agents yet.</td></tr>'}</tbody>
+      </table></div>`;
+    Modal.open('Agent Report — For Finance',body,`<button class="btn btn-ghost" onclick="Modal.close()">Close</button><button class="btn btn-gold" onclick="Agents.copyReport()">Copy Report</button>`);
+    this._reportRows=rows;
+  },
+  copyReport(){
+    const rows=this._reportRows||[];
+    const dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+    const lines=[`SASH AFRIQUE — AGENT ORDERS REPORT (${dateStr})`,'',
+      ...rows.map(r=>`${r.name} (${r.campus||'—'}): ${r.orders} order(s) won, ${r.sourced} lead(s) sourced`)];
+    const text=lines.join('\n');
+    const done=()=>Toast.show('Report copied — paste it for Finance.');
+    const fail=()=>Toast.show('Could not copy automatically — please select and copy the text manually.','error');
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(fail);
+    }else{
+      try{
+        const ta=document.createElement('textarea');
+        ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+        document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+        done();
+      }catch(e){fail();}
+    }
   },
 };
 
