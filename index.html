@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#0A0A0A"/>
 <meta name="description" content="Sash Afrique — Internal CRM & Insights"/>
 <title>Sash Afrique CRM</title>
+<link rel="icon" type="image/png" href="logo.png"/>
+<link rel="apple-touch-icon" href="logo.png"/>
 <link rel="manifest" href="manifest.json"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -30,6 +32,7 @@ img{display:block;max-width:100%}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+#setup-screen{display:none;}
 
 /* ── FEEDBACK UI & CALL LOG ─────────────────── */
 .fb-score-display{min-width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold);background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);flex-shrink:0;transition:color var(--trans);}
@@ -49,7 +52,8 @@ img{display:block;max-width:100%}
 .login-bg::after{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(250,178,2,.06) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
 .login-card{position:relative;z-index:1;width:100%;max-width:400px;padding:48px 40px;background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:0 8px 48px rgba(0,0,0,.6);}
 .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:36px;}
-.login-logo-mark{width:44px;height:44px;background:var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:20px;color:#000;flex-shrink:0;}
+.login-logo-mark{width:44px;height:44px;background:#000;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.login-logo-mark img{width:100%;height:100%;object-fit:contain;padding:4px;}
 .login-logo-text{display:flex;flex-direction:column;}
 .login-logo-text strong{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;letter-spacing:.01em;}
 .login-logo-text span{font-size:12px;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;}
@@ -112,7 +116,8 @@ select.filter-sel:focus{border-color:var(--gold);}
 #app.active{display:flex;}
 #sidebar{width:var(--sidebar);height:100%;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:relative;z-index:10;}
 .sidebar-brand{display:flex;align-items:center;gap:10px;padding:20px 20px 16px;border-bottom:1px solid var(--border);}
-.sidebar-brand-mark{width:34px;height:34px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:15px;color:#000;}
+.sidebar-brand-mark{width:34px;height:34px;background:#000;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.sidebar-brand-mark img{width:100%;height:100%;object-fit:contain;padding:3px;}
 .sidebar-brand-text{display:flex;flex-direction:column;line-height:1.2;}
 .sidebar-brand-text strong{font-size:14px;font-weight:600;}
 .sidebar-brand-text span{font-size:11px;color:var(--text2);letter-spacing:.03em;}
@@ -283,7 +288,7 @@ select.filter-sel:focus{border-color:var(--gold);}
 </head>
 <body>
 
-<!-- SETUP SCREEN (shown if no Apps Script URL configured) -->
+<!-- SETUP SCREEN (legacy — sheet URL is now hardcoded, this is disabled via CSS) -->
 <div id="setup-screen">
   <div class="setup-card">
     <h2>Connect Google Sheets</h2>
@@ -307,7 +312,7 @@ select.filter-sel:focus{border-color:var(--gold);}
   <div class="login-bg"></div>
   <div class="login-card">
     <div class="login-logo">
-      <div class="login-logo-mark">S</div>
+      <div class="login-logo-mark"><img src="logo.png" alt="Sash Afrique"/></div>
       <div class="login-logo-text"><strong>Sash Afrique</strong><span>Internal CRM</span></div>
     </div>
     <h1 class="login-heading">Welcome back</h1>
@@ -329,7 +334,7 @@ select.filter-sel:focus{border-color:var(--gold);}
 <div id="app">
   <nav id="sidebar">
     <div class="sidebar-brand">
-      <div class="sidebar-brand-mark">S</div>
+      <div class="sidebar-brand-mark"><img src="logo.png" alt="Sash Afrique"/></div>
       <div class="sidebar-brand-text"><strong>Sash Afrique</strong><span>CRM v2</span></div>
     </div>
     <div class="sidebar-nav" id="sidebar-nav-items"></div>
