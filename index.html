@@ -502,6 +502,22 @@ select.filter-sel:focus{border-color:var(--gold);}
         </div>
       </div>
 
+      <!-- ANALYSIS -->
+      <div class="view" id="view-analysis">
+        <div class="page-header">
+          <div class="page-header-left"><h2>Analysis &amp; Insights</h2><p>What the data says is working, what needs attention, and what to do next.</p></div>
+          <button class="btn btn-gold btn-sm" onclick="Analysis.copySummary()">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            Copy Meeting Summary
+          </button>
+        </div>
+        <div style="font-size:12px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:20px">
+          Use this page to prepare your department update — tap "Copy Meeting Summary" to get a ready-to-read text version for your meeting notes.
+        </div>
+        <div class="kpi-grid" id="an-kpis"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px" id="an-grid"></div>
+      </div>
+
       <!-- ATTENDANCE -->
       <div class="view" id="view-attendance">
         <div class="page-header">
@@ -741,8 +757,8 @@ const Modal={
 };
 
 /* ── ROUTER ────────────────────────────────────────── */
-const VIEWS_ADMIN={dashboard:{title:'Dashboard'},leads:{title:'Leads'},feedback:{title:'Achiever Feedback'},calllog:{title:'Call Log'},attendance:{title:'Attendance Report'}};
-const VIEWS_OFFICER={dashboard:{title:'Dashboard'},leads:{title:'Leads'},feedback:{title:'Achiever Feedback'},calllog:{title:'Call Log'}};
+const VIEWS_ADMIN={dashboard:{title:'Dashboard'},leads:{title:'Leads'},feedback:{title:'Achiever Feedback'},calllog:{title:'Call Log'},analysis:{title:'Analysis & Insights'},attendance:{title:'Attendance Report'}};
+const VIEWS_OFFICER={dashboard:{title:'Dashboard'},leads:{title:'Leads'},feedback:{title:'Achiever Feedback'},calllog:{title:'Call Log'},analysis:{title:'Analysis & Insights'}};
 const Router={
   current:'dashboard',
   async go(v){
@@ -759,6 +775,7 @@ const Router={
     else if(v==='leads') await Leads.render();
     else if(v==='feedback') await Feedback.render();
     else if(v==='calllog') await CallLog.render();
+    else if(v==='analysis') await Analysis.render();
     else if(v==='attendance') await Attendance.render();
     Modal.close();closeSidebar();window.scrollTo(0,0);
   }
@@ -771,12 +788,13 @@ const NAV_ICONS={
   feedback:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>',
   attendance:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
   calllog:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>',
+  analysis:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2"/></svg>',
 };
 function buildNav(){
   const isAdmin=Auth.isAdmin();
-  const items=isAdmin?['dashboard','leads','feedback','calllog','attendance']:['dashboard','leads','feedback','calllog'];
-  const labels={dashboard:'Dashboard',leads:'Leads',feedback:'Feedback',calllog:'Calls',attendance:'Attendance'};
-  const bnavLabels={dashboard:'Home',leads:'Leads',feedback:'Feedback',calllog:'Calls',attendance:'Reports'};
+  const items=isAdmin?['dashboard','leads','feedback','calllog','analysis','attendance']:['dashboard','leads','feedback','calllog','analysis'];
+  const labels={dashboard:'Dashboard',leads:'Leads',feedback:'Feedback',calllog:'Calls',analysis:'Analysis',attendance:'Attendance'};
+  const bnavLabels={dashboard:'Home',leads:'Leads',feedback:'Feedback',calllog:'Calls',analysis:'Insights',attendance:'Reports'};
   $('sidebar-nav-items').innerHTML=`
     <div class="nav-section-label">Overview</div>
     ${items.map(v=>`
@@ -1607,6 +1625,179 @@ const CallLog={
     if(!ok)return;
     Cache.calllog=Cache.calllog.filter(r=>r.id!==id);
     Toast.show('Call deleted.','info');this._render();
+  },
+};
+
+/* ══════════════════════════════════════════════════
+   ANALYSIS  —  what's working / what needs improvement / actions
+   Visible to both Admin and Officer. Reads the same Leads, Feedback,
+   Call Log and Attendance data everyone already logs, and turns it
+   into plain-English takeaways that can be used to make decisions
+   or reported on at a department meeting.
+══════════════════════════════════════════════════ */
+const Analysis={
+  _last:null,
+  async render(){
+    const[leadsRaw,fbRaw,clRaw,attRaw]=await Promise.all([
+      GS.get('Leads'),GS.get('Feedback'),GS.get('CallLog'),GS.get('Attendance')
+    ]);
+    Cache.leads=leadsRaw.map(rowToLead);
+    Cache.feedback=fbRaw.map(rowToFeedback);
+    Cache.calllog=clRaw.map(rowToCall);
+    Cache.attendance=attRaw.map(rowToAtt);
+    this._render();
+  },
+  monthKeyOf(offset){
+    const d=new Date();d.setMonth(d.getMonth()+offset);
+    return`${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
+  },
+  compute(){
+    const leads=Cache.leads,fb=Cache.feedback,calls=Cache.calllog,att=Cache.attendance;
+    const mk=this.monthKeyOf(0),lmk=this.monthKeyOf(-1);
+    const inMonth=(arr,field,m)=>arr.filter(x=>x[field]&&x[field].startsWith(m));
+
+    const leadsThis=inMonth(leads,'created',mk),leadsLast=inMonth(leads,'created',lmk);
+    const open=leads.filter(l=>!['Won','Lost'].includes(l.stage));
+    const closed=leads.filter(l=>['Won','Lost'].includes(l.stage));
+    const won=leads.filter(l=>l.stage==='Won');
+    const convRate=closed.length?Math.round(won.length/closed.length*100):null;
+    const overdue=open.filter(l=>l.followup&&l.followup<today());
+    const noFollowup=open.filter(l=>!l.followup);
+
+    const bySource={};
+    leads.forEach(l=>{
+      const s=l.source||'Other';
+      (bySource[s]=bySource[s]||{total:0,won:0}).total++;
+      if(l.stage==='Won') bySource[s].won++;
+    });
+    let bestSource=null,worstSource=null;
+    Object.entries(bySource).forEach(([s,d])=>{
+      if(d.total<3) return;
+      const rate=d.won/d.total;
+      if(!bestSource||rate>bestSource.rate) bestSource={source:s,rate,total:d.total};
+      if(!worstSource||rate<worstSource.rate) worstSource={source:s,rate,total:d.total};
+    });
+    if(bestSource&&worstSource&&bestSource.source===worstSource.source) worstSource=null;
+
+    const avgCsat=arr=>arr.length?Math.round(arr.reduce((a,f)=>a+(f.csat||0),0)/arr.length*10)/10:null;
+    const npsOf=arr=>{if(!arr.length)return null;const pr=arr.filter(f=>f.nps>=9).length,de=arr.filter(f=>f.nps<7).length;return Math.round((pr/arr.length-de/arr.length)*100);};
+    const fbThis=inMonth(fb,'date',mk),fbLast=inMonth(fb,'date',lmk);
+    const csatThis=avgCsat(fbThis),csatLast=avgCsat(fbLast);
+    const npsThis=npsOf(fbThis),npsLast=npsOf(fbLast);
+    const openComplaints=fb.filter(f=>f.complaintsRaised&&!f.complaintsResolved);
+    const pendingCallbacks=fb.filter(f=>f.wantsCallback);
+    const referralOpps=fb.filter(f=>f.referralWilling&&f.referralName);
+
+    const pickupRate=arr=>arr.length?Math.round(arr.filter(c=>c.outcome==='Picked Up').length/arr.length*100):null;
+    const callsThis=inMonth(calls,'date',mk);
+    const pickupThis=pickupRate(callsThis);
+    const callbackDue=calls.filter(c=>c.outcome==='Call Back Later');
+
+    const attThis=inMonth(att,'date',mk);
+    const lateThis=attThis.filter(a=>a.late).length;
+    const punctuality=attThis.length?Math.round((attThis.length-lateThis)/attThis.length*100):null;
+
+    const working=[],improve=[],actions=[];
+
+    if(npsThis!==null&&npsThis>=50) working.push(`NPS is strong at ${npsThis>=0?'+':''}${npsThis} this month — most Achievers are promoters.`);
+    else if(npsThis!==null&&npsLast!==null&&npsThis>npsLast) working.push(`NPS improved from ${npsLast>=0?'+':''}${npsLast} to ${npsThis>=0?'+':''}${npsThis} month-on-month.`);
+    if(npsThis!==null&&npsThis<0) improve.push(`NPS is negative this month (${npsThis}) — there are more detractors than promoters.`);
+    else if(npsThis!==null&&npsLast!==null&&npsThis<npsLast) improve.push(`NPS slipped from ${npsLast>=0?'+':''}${npsLast} to ${npsThis>=0?'+':''}${npsThis} month-on-month.`);
+
+    if(csatThis!==null&&csatThis>=8) working.push(`CSAT is high this month at ${csatThis}/10.`);
+    if(csatThis!==null&&csatThis<7) improve.push(`CSAT dropped below target this month (${csatThis}/10).`);
+
+    if(convRate!==null&&convRate>=50) working.push(`Overall lead-to-sale conversion is healthy at ${convRate}% of closed leads.`);
+    if(convRate!==null&&convRate<30) improve.push(`Lead-to-sale conversion is low at ${convRate}% of closed leads.`);
+
+    if(overdue.length) improve.push(`${overdue.length} lead${overdue.length===1?'':'s'} ${overdue.length===1?'has':'have'} an overdue follow-up.`);
+    if(noFollowup.length) improve.push(`${noFollowup.length} open lead${noFollowup.length===1?'':'s'} ${noFollowup.length===1?'has':'have'} no follow-up date set.`);
+    if(!overdue.length&&open.length) working.push('No overdue follow-ups right now — the pipeline is being kept current.');
+
+    if(openComplaints.length) improve.push(`${openComplaints.length} customer complaint${openComplaints.length===1?'':'s'} still unresolved.`);
+    else if(fb.some(f=>f.complaintsRaised)) working.push('All raised complaints have been resolved.');
+
+    if(callbackDue.length) improve.push(`${callbackDue.length} logged call${callbackDue.length===1?'':'s'} marked "Call Back Later" may still need action.`);
+    if(pendingCallbacks.length) improve.push(`${pendingCallbacks.length} Achiever${pendingCallbacks.length===1?'':'s'} asked for a callback in their feedback.`);
+
+    if(pickupThis!==null&&pickupThis>=70) working.push(`Call pickup rate is strong this month at ${pickupThis}%.`);
+    if(pickupThis!==null&&pickupThis<50) improve.push(`Less than half of calls are being answered this month (${pickupThis}%).`);
+
+    if(punctuality!==null&&punctuality>=90) working.push(`Attendance punctuality is excellent this month (${punctuality}% on time).`);
+    if(punctuality!==null&&punctuality<80) improve.push(`Punctuality dipped this month — only ${punctuality}% of days were on time.`);
+
+    if(bestSource) working.push(`"${bestSource.source}" leads convert best (${Math.round(bestSource.rate*100)}% win rate over ${bestSource.total} leads) — worth leaning into.`);
+    if(worstSource&&worstSource.rate<0.15) improve.push(`"${worstSource.source}" leads rarely convert (${Math.round(worstSource.rate*100)}% over ${worstSource.total} leads).`);
+
+    if(referralOpps.length) working.push(`${referralOpps.length} Achiever${referralOpps.length===1?'':'s'} volunteered referrals — an active word-of-mouth pipeline.`);
+
+    if(leadsLast.length>0&&leadsThis.length>leadsLast.length) working.push(`Lead volume grew from ${leadsLast.length} to ${leadsThis.length} month-on-month.`);
+    if(leadsLast.length>0&&leadsThis.length<leadsLast.length) improve.push(`Lead volume dropped from ${leadsLast.length} to ${leadsThis.length} month-on-month.`);
+
+    if(!working.length) working.push('Not enough data yet to confirm a clear win — keep logging leads and feedback consistently.');
+    if(!improve.length) improve.push('No major issues detected right now — keep monitoring as new data comes in.');
+
+    if(overdue.length) actions.push(`Contact the ${overdue.length} lead${overdue.length===1?'':'s'} with overdue follow-ups today, oldest first.`);
+    if(noFollowup.length) actions.push("Set a follow-up date for every open lead that's missing one.");
+    if(openComplaints.length) actions.push(`Resolve the ${openComplaints.length} open complaint${openComplaints.length===1?'':'s'} and log the outcome in Feedback.`);
+    if(callbackDue.length||pendingCallbacks.length) actions.push('Return the pending callback requests from the Call Log and Feedback.');
+    if(npsThis!==null&&(npsThis<0||(npsLast!==null&&npsThis<npsLast))) actions.push('Review detractor feedback for recurring issues and address the root cause.');
+    if(worstSource&&bestSource) actions.push(`Shift time or budget away from "${worstSource.source}" toward "${bestSource.source}" leads.`);
+    if(pickupThis!==null&&pickupThis<50) actions.push("Try alternate contact times or WhatsApp for Achievers who aren't picking up.");
+    if(punctuality!==null&&punctuality<80) actions.push('Flag attendance punctuality with the team and agree on a fix.');
+    if(!actions.length) actions.push('Keep logging feedback, calls and leads consistently — more data will sharpen these recommendations.');
+
+    return{working,improve,actions,metrics:{convRate,csatThis,csatLast,npsThis,npsLast,pickupThis,punctuality,overdueCount:overdue.length,monthLabel:Performance.monthLabel(mk)}};
+  },
+  _card(title,color,items){
+    return`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;border-left:3px solid ${color}">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${color};margin-bottom:10px">${esc(title)}</div>
+      <ul style="display:flex;flex-direction:column;gap:8px">${items.map(i=>`<li style="font-size:13px;color:var(--text);line-height:1.5;padding-left:14px;position:relative;list-style:none"><span style="position:absolute;left:0;color:${color}">•</span>${esc(i)}</li>`).join('')}</ul>
+    </div>`;
+  },
+  _render(){
+    const a=this.compute();
+    this._last=a;
+    const m=a.metrics;
+    const trendArrow=(cur,prev)=>{
+      if(cur===null||prev===null||prev===undefined) return'';
+      if(cur>prev) return` <span style="color:var(--green)">&#9650;</span>`;
+      if(cur<prev) return` <span style="color:var(--red)">&#9660;</span>`;
+      return` <span style="color:var(--text3)">—</span>`;
+    };
+    $('an-kpis').innerHTML=`
+      <div class="kpi-card"><div class="kpi-label">Conversion Rate</div><div class="kpi-value">${m.convRate!==null?m.convRate+'%':'—'}</div><div class="kpi-sub">Won ÷ closed leads</div></div>
+      <div class="kpi-card"><div class="kpi-label">CSAT</div><div class="kpi-value">${m.csatThis!==null?m.csatThis+'/10':'—'}${trendArrow(m.csatThis,m.csatLast)}</div><div class="kpi-sub">${m.monthLabel}</div></div>
+      <div class="kpi-card"><div class="kpi-label">NPS</div><div class="kpi-value" style="color:${m.npsThis===null?'inherit':m.npsThis>=50?'var(--green)':m.npsThis>=0?'var(--gold)':'var(--red)'}">${m.npsThis!==null?(m.npsThis>=0?'+':'')+m.npsThis:'—'}${trendArrow(m.npsThis,m.npsLast)}</div><div class="kpi-sub">${m.monthLabel}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Call Pickup</div><div class="kpi-value">${m.pickupThis!==null?m.pickupThis+'%':'—'}</div><div class="kpi-sub">${m.monthLabel}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Punctuality</div><div class="kpi-value">${m.punctuality!==null?m.punctuality+'%':'—'}</div><div class="kpi-sub">${m.monthLabel}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Overdue Follow-ups</div><div class="kpi-value" style="color:${m.overdueCount?'var(--red)':'var(--green)'}">${m.overdueCount}</div><div class="kpi-sub">Needs attention</div></div>
+    `;
+    $('an-grid').innerHTML=
+      this._card("What's Working",'var(--green)',a.working)+
+      this._card('What Needs Improvement','var(--red)',a.improve)+
+      this._card('Recommended Actions','var(--gold)',a.actions);
+  },
+  copySummary(){
+    const a=this._last||this.compute();
+    const dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+    const lines=[`SASH AFRIQUE — DEPARTMENT UPDATE (${dateStr})`,'',
+      "WHAT'S WORKING:",...a.working.map(w=>'- '+w),'',
+      'WHAT NEEDS IMPROVEMENT:',...a.improve.map(w=>'- '+w),'',
+      'RECOMMENDED ACTIONS:',...a.actions.map(w=>'- '+w)];
+    const text=lines.join('\n');
+    const done=()=>Toast.show('Summary copied — paste it into your meeting notes.');
+    const fail=()=>Toast.show('Could not copy automatically — please select and copy the text manually.','error');
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(fail);
+    }else{
+      try{
+        const ta=document.createElement('textarea');
+        ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+        document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+        done();
+      }catch(e){fail();}
+    }
   },
 };
 
