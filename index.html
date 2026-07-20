@@ -220,6 +220,30 @@ select.filter-sel:focus{border-color:var(--gold);}
 #modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;padding:20px;}
 #modal-overlay.open{display:flex;}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.7);}
+.modal-lg{max-width:860px;}
+
+/* ── LEADERSHIP REPORT ─────────────────── */
+.rpt-letterhead{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:16px;margin-bottom:18px;border-bottom:2px solid var(--gold);}
+.rpt-letterhead-brand{display:flex;align-items:center;gap:10px;}
+.rpt-letterhead-mark{width:36px;height:36px;background:#000;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.rpt-letterhead-mark img{width:100%;height:100%;object-fit:contain;padding:3px;}
+.rpt-letterhead-brand strong{display:block;font-family:'Playfair Display',serif;font-size:15px;font-weight:600;}
+.rpt-letterhead-brand span{display:block;font-size:11px;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;}
+.rpt-letterhead-meta{text-align:right;font-size:11px;color:var(--text2);line-height:1.5;}
+.rpt-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;margin-bottom:4px;}
+.rpt-subtitle{font-size:13px;color:var(--text2);margin-bottom:22px;}
+.rpt-section-label{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:26px 0 12px;}
+.rpt-section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.rpt-summary{font-size:14px;line-height:1.75;color:var(--text);background:var(--surface2);border-left:3px solid var(--gold);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:16px 18px;}
+.rpt-kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;}
+.rpt-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;}
+.rpt-kpi-label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;}
+.rpt-kpi-value{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;line-height:1.1;}
+.rpt-kpi-delta{font-size:11px;color:var(--text2);margin-top:4px;}
+.rpt-list{display:flex;flex-direction:column;gap:10px;}
+.rpt-list li{display:flex;gap:10px;font-size:13.5px;line-height:1.6;color:var(--text);list-style:none;}
+.rpt-list li .dot{flex-shrink:0;width:8px;height:8px;border-radius:50%;margin-top:6px;}
+.rpt-signoff{margin-top:26px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--text2);line-height:1.6;}
 .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
 .modal-header h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;}
 .modal-close{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all var(--trans);}
@@ -548,13 +572,19 @@ select.filter-sel:focus{border-color:var(--gold);}
       <div class="view" id="view-analysis">
         <div class="page-header">
           <div class="page-header-left"><h2>Analysis &amp; Insights</h2><p>What the data says is working, what needs attention, and what to do next.</p></div>
-          <button class="btn btn-gold btn-sm" onclick="Analysis.copySummary()">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-            Copy Meeting Summary
-          </button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="Analysis.copySummary()">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              Copy Quick Summary
+            </button>
+            <button class="btn btn-gold btn-sm" onclick="Analysis.openLeadershipReport()">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M9 8h6M5 4h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z"/></svg>
+              Monthly Report to Leadership
+            </button>
+          </div>
         </div>
         <div style="font-size:12px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:20px">
-          Use this page to prepare your department update — tap "Copy Meeting Summary" to get a ready-to-read text version for your meeting notes.
+          Use this page to prepare your department update — tap "Monthly Report to Leadership" for a polished, presentation-ready report, or "Copy Quick Summary" for a plain-text version for chat or meeting notes.
         </div>
         <div class="kpi-grid" id="an-kpis"></div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px" id="an-grid"></div>
@@ -786,15 +816,16 @@ const Toast={
 
 /* ── MODAL ─────────────────────────────────────────── */
 const Modal={
-  open(title,body,footer){
+  open(title,body,footer,size){
     $('modal-title').textContent=title;
     $('modal-body').innerHTML=body;
     $('modal-footer').innerHTML=footer||'';
+    $('modal-box').classList.toggle('modal-lg',size==='lg');
     $('modal-overlay').classList.add('open');
     document.body.style.overflow='hidden';
     setTimeout(()=>$('modal-body').querySelector('input,select,textarea')?.focus(),80);
   },
-  close(){$('modal-overlay').classList.remove('open');document.body.style.overflow='';},
+  close(){$('modal-overlay').classList.remove('open');document.body.style.overflow='';$('modal-box').classList.remove('modal-lg');},
   handleOverlayClick(e){if(e.target===$('modal-overlay')) Modal.close();}
 };
 
@@ -2011,7 +2042,15 @@ const Analysis={
     if(punctuality!==null&&punctuality<80) actions.push('Flag attendance punctuality with the team and agree on a fix.');
     if(!actions.length) actions.push('Keep logging feedback, calls and leads consistently — more data will sharpen these recommendations.');
 
-    return{working,improve,actions,metrics:{convRate,csatThis,csatLast,npsThis,npsLast,pickupThis,punctuality,overdueCount:overdue.length,monthLabel:Performance.monthLabel(mk)}};
+    const wonThis=leadsThis.filter(l=>l.stage==='Won').length,wonLast=leadsLast.filter(l=>l.stage==='Won').length;
+    return{working,improve,actions,metrics:{
+      convRate,csatThis,csatLast,npsThis,npsLast,pickupThis,punctuality,overdueCount:overdue.length,
+      monthLabel:Performance.monthLabel(mk),lastMonthLabel:Performance.monthLabel(lmk),
+      leadsThisCount:leadsThis.length,leadsLastCount:leadsLast.length,
+      wonThis,wonLast,openCount:open.length,totalLeads:leads.length,
+      bestSource,worstSource,noFollowupCount:noFollowup.length,
+      openComplaintsCount:openComplaints.length,pendingCallbacksCount:pendingCallbacks.length,referralOppsCount:referralOpps.length,
+    }};
   },
   _card(title,color,items){
     return`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;border-left:3px solid ${color}">
@@ -2062,6 +2101,151 @@ const Analysis={
         done();
       }catch(e){fail();}
     }
+  },
+  DEPT_NAME:'Sales & Leads Generation',
+  _execSummary(a){
+    const m=a.metrics;
+    const parts=[];
+    const leadsDelta=m.leadsLastCount>0?Math.round((m.leadsThisCount-m.leadsLastCount)/m.leadsLastCount*100):null;
+    parts.push(`In ${m.monthLabel}, the ${this.DEPT_NAME} team logged ${m.leadsThisCount} new lead${m.leadsThisCount===1?'':'s'} and closed ${m.wonThis} sale${m.wonThis===1?'':'s'}${leadsDelta!==null?`, ${leadsDelta>=0?'up':'down'} ${Math.abs(leadsDelta)}% on ${m.lastMonthLabel} (${m.leadsLastCount})`:''}.`);
+    if(m.convRate!==null) parts.push(`Lead-to-sale conversion stands at ${m.convRate}%${m.convRate>=50?', a healthy rate':m.convRate<30?', below where we want it':''}.`);
+    if(m.npsThis!==null) parts.push(`Customer sentiment is ${m.npsThis>=50?'strong':m.npsThis>=0?'stable but with room to grow':'a concern this month'}, with NPS at ${m.npsThis>=0?'+':''}${m.npsThis}${m.csatThis!==null?` and CSAT at ${m.csatThis}/10`:''}.`);
+    if(m.overdueCount>0) parts.push(`${m.overdueCount} lead${m.overdueCount===1?' has':'s have'} an overdue follow-up and need${m.overdueCount===1?'s':''} immediate attention.`);
+    else parts.push('The pipeline is being kept current, with no overdue follow-ups outstanding.');
+    return parts.join(' ');
+  },
+  _reportBody(a,dateStr){
+    const m=a.metrics;
+    const user=Auth.current();
+    const delta=(cur,prev,suffix)=>{
+      if(cur===null||cur===undefined||prev===null||prev===undefined) return'';
+      const diff=cur-prev;
+      if(diff===0) return`<span class="rpt-kpi-delta">No change vs ${m.lastMonthLabel}</span>`;
+      return`<span class="rpt-kpi-delta" style="color:${diff>0?'var(--green)':'var(--red)'}">${diff>0?'▲':'▼'} ${Math.abs(diff)}${suffix||''} vs ${m.lastMonthLabel}</span>`;
+    };
+    const listHTML=(items,color)=>`<ul class="rpt-list">${items.map(i=>`<li><span class="dot" style="background:${color}"></span><span>${esc(i)}</span></li>`).join('')}</ul>`;
+    return`
+      <div class="rpt-letterhead">
+        <div class="rpt-letterhead-brand">
+          <div class="rpt-letterhead-mark"><img src="logo.png" alt=""/></div>
+          <div><strong>Sash Afrique</strong><span>${esc(this.DEPT_NAME)}</span></div>
+        </div>
+        <div class="rpt-letterhead-meta">Prepared by ${esc(user?.name||'—')}<br/>${esc(dateStr)}</div>
+      </div>
+      <div class="rpt-title">Monthly Report to Leadership</div>
+      <div class="rpt-subtitle">${esc(m.monthLabel)} performance summary — ${esc(this.DEPT_NAME)}</div>
+
+      <div class="rpt-section-label">Executive Summary</div>
+      <div class="rpt-summary">${esc(this._execSummary(a))}</div>
+
+      <div class="rpt-section-label">Performance Snapshot</div>
+      <div class="rpt-kpi-strip">
+        <div class="rpt-kpi"><div class="rpt-kpi-label">New Leads</div><div class="rpt-kpi-value">${m.leadsThisCount}</div>${delta(m.leadsThisCount,m.leadsLastCount)}</div>
+        <div class="rpt-kpi"><div class="rpt-kpi-label">Sales Won</div><div class="rpt-kpi-value">${m.wonThis}</div>${delta(m.wonThis,m.wonLast)}</div>
+        <div class="rpt-kpi"><div class="rpt-kpi-label">Conversion</div><div class="rpt-kpi-value">${m.convRate!==null?m.convRate+'%':'—'}</div></div>
+        <div class="rpt-kpi"><div class="rpt-kpi-label">CSAT</div><div class="rpt-kpi-value">${m.csatThis!==null?m.csatThis+'/10':'—'}</div>${delta(m.csatThis,m.csatLast)}</div>
+        <div class="rpt-kpi"><div class="rpt-kpi-label">NPS</div><div class="rpt-kpi-value">${m.npsThis!==null?(m.npsThis>=0?'+':'')+m.npsThis:'—'}</div>${delta(m.npsThis,m.npsLast)}</div>
+        <div class="rpt-kpi"><div class="rpt-kpi-label">Call Pickup</div><div class="rpt-kpi-value">${m.pickupThis!==null?m.pickupThis+'%':'—'}</div></div>
+        <div class="rpt-kpi"><div class="rpt-kpi-label">Punctuality</div><div class="rpt-kpi-value">${m.punctuality!==null?m.punctuality+'%':'—'}</div></div>
+        <div class="rpt-kpi"><div class="rpt-kpi-label">Overdue Follow-ups</div><div class="rpt-kpi-value" style="color:${m.overdueCount?'var(--red)':'var(--green)'}">${m.overdueCount}</div></div>
+      </div>
+
+      <div class="rpt-section-label">What's Working</div>
+      ${listHTML(a.working,'var(--green)')}
+
+      <div class="rpt-section-label">What Needs Improvement</div>
+      ${listHTML(a.improve,'var(--red)')}
+
+      <div class="rpt-section-label">Recommended Actions</div>
+      ${listHTML(a.actions,'var(--gold)')}
+
+      <div class="rpt-signoff">Report generated from live CRM data as of ${esc(dateStr)}. Figures reflect ${esc(m.monthLabel)} unless otherwise noted.</div>
+    `;
+  },
+  openLeadershipReport(){
+    const a=this._last||this.compute();
+    this._last=a;
+    const dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+    const body=this._reportBody(a,dateStr);
+    Modal.open('Monthly Report to Leadership',body,
+      `<button class="btn btn-ghost" onclick="Modal.close()">Close</button>
+       <button class="btn btn-ghost" onclick="Analysis.copyLeadershipReport()">Copy as Text</button>
+       <button class="btn btn-gold" onclick="Analysis.printLeadershipReport()">Print / Save as PDF</button>`,
+      'lg');
+  },
+  copyLeadershipReport(){
+    const a=this._last||this.compute();
+    const m=a.metrics;
+    const dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+    const user=Auth.current();
+    const lines=[
+      'SASH AFRIQUE',`${this.DEPT_NAME} — MONTHLY REPORT TO LEADERSHIP`,
+      `${m.monthLabel} · Prepared by ${user?.name||'—'} · ${dateStr}`,'','',
+      'EXECUTIVE SUMMARY',this._execSummary(a),'','',
+      'PERFORMANCE SNAPSHOT',
+      `- New Leads: ${m.leadsThisCount} (prev. month ${m.leadsLastCount})`,
+      `- Sales Won: ${m.wonThis} (prev. month ${m.wonLast})`,
+      `- Conversion Rate: ${m.convRate!==null?m.convRate+'%':'—'}`,
+      `- CSAT: ${m.csatThis!==null?m.csatThis+'/10':'—'}`,
+      `- NPS: ${m.npsThis!==null?(m.npsThis>=0?'+':'')+m.npsThis:'—'}`,
+      `- Call Pickup Rate: ${m.pickupThis!==null?m.pickupThis+'%':'—'}`,
+      `- Punctuality: ${m.punctuality!==null?m.punctuality+'%':'—'}`,
+      `- Overdue Follow-ups: ${m.overdueCount}`,'','',
+      "WHAT'S WORKING",...a.working.map(w=>'- '+w),'','',
+      'WHAT NEEDS IMPROVEMENT',...a.improve.map(w=>'- '+w),'','',
+      'RECOMMENDED ACTIONS',...a.actions.map(w=>'- '+w)
+    ];
+    const text=lines.join('\n');
+    const done=()=>Toast.show('Full report copied — paste it into your document or email.');
+    const fail=()=>Toast.show('Could not copy automatically — please select and copy the text manually.','error');
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(fail);
+    }else{
+      try{
+        const ta=document.createElement('textarea');
+        ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+        document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+        done();
+      }catch(e){fail();}
+    }
+  },
+  printLeadershipReport(){
+    const a=this._last||this.compute();
+    const dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+    const body=this._reportBody(a,dateStr);
+    const w=window.open('','_blank');
+    if(!w){Toast.show('Please allow pop-ups to print the report.','error');return;}
+    w.document.write(`<!DOCTYPE html><html><head><title>Monthly Report — ${esc(a.metrics.monthLabel)}</title>
+      <meta charset="UTF-8"/>
+      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+      <style>
+        :root{--gold:#c98e00;--green:#1f8a54;--red:#c23b3b;--border:#ddd;--text:#111;--text2:#555;--surface2:#f6f6f6;--radius-sm:8px;}
+        *{box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--text);max-width:760px;margin:40px auto;padding:0 24px;line-height:1.5;}
+        .rpt-letterhead{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:16px;margin-bottom:18px;border-bottom:2px solid var(--gold);}
+        .rpt-letterhead-brand strong{display:block;font-family:'Playfair Display',serif;font-size:16px;}
+        .rpt-letterhead-brand span{display:block;font-size:11px;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;}
+        .rpt-letterhead-meta{text-align:right;font-size:11px;color:var(--text2);line-height:1.5;}
+        .rpt-letterhead-mark{display:none;}
+        .rpt-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;margin-bottom:4px;}
+        .rpt-subtitle{font-size:13px;color:var(--text2);margin-bottom:22px;}
+        .rpt-section-label{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:26px 0 12px;}
+        .rpt-section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+        .rpt-summary{font-size:14px;line-height:1.75;background:var(--surface2);border-left:3px solid var(--gold);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:16px 18px;}
+        .rpt-kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+        .rpt-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;}
+        .rpt-kpi-label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;}
+        .rpt-kpi-value{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;}
+        .rpt-kpi-delta{font-size:10px;color:var(--text2);}
+        .rpt-list{padding:0;margin:0;}
+        .rpt-list li{display:flex;gap:10px;font-size:13.5px;line-height:1.6;list-style:none;margin-bottom:8px;}
+        .rpt-list li .dot{flex-shrink:0;width:8px;height:8px;border-radius:50%;margin-top:6px;}
+        .rpt-signoff{margin-top:26px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--text2);}
+        @media print{body{margin:0;padding:24px;}}
+      </style></head><body>${body}</body></html>`);
+    w.document.close();
+    w.onload=()=>{w.focus();w.print();};
+    setTimeout(()=>{try{w.focus();w.print();}catch(e){}},400);
   },
 };
 
